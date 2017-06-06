@@ -9,7 +9,7 @@ __pycache__/
 #other files
 *.rst
 *.gitignore
-*.yml
+# *.yml
 *.csv
 *.out
 *.in
