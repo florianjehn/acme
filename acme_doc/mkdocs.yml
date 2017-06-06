@@ -1,0 +1,15 @@
+site_name: ACME Documentation
+site_description: Documentation of the ACME Tool for automated model building
+repo_url: https://github.com/zutn/ACME
+site_author: Florian Jehn
+
+
+pages:
+- [index.md, Home]
+- [background.md, Theoretical Background]
+- [start.md, Getting started]
+- [tutorial.md, Tutorial]
+- [license.md, License]
+
+theme: windmill
+
