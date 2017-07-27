@@ -24,7 +24,7 @@ class Chromosome:
 
 def _generate_parent(length, gene_set, get_fitness):
     """
-    Generates on individual form a given gene_set and tests its fitness.
+    Generates on individual form a given gene_set and ss its fitness.
 
     :param length:
     :param gene_set:
@@ -38,7 +38,7 @@ def _generate_parent(length, gene_set, get_fitness):
 
 def _mutate(parent, gene_set, get_fitness):
     """
-    Mutates the genome of a parent and tests its fitness.
+    Mutates the genome of a parent and ss its fitness.
 
     :param parent:
     :param gene_set:
