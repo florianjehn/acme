@@ -1,4 +1,3 @@
-#/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Jul 26 14:24 2017
