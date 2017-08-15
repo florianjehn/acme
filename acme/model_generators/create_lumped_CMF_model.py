@@ -5,5 +5,5 @@ Created on Aug 15 13:28 2017
 
 This file is used to start the construction of a predefined CMF model. The
 user only has to provide the forcing data and the kind of techniques (
-crossover, mutation, objectivefunction).
+crossover, mutation, objective function).
 """
