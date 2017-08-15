@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: Clinton Sheppard <fluentcoder@gmail.com>
+# Modifications: Florian U. Jehn <florianjehn@posteo.de>
 # Copyright (c) 2016 Clinton Sheppard
 # Modification Copyright (c) 2017 Florian Ulrich Jehn <florianjehn@posteo.de>
 #
