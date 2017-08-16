@@ -47,4 +47,3 @@ def get_obj_func(name):
         return spotpy.objectivefunctions.kge
     else:
         raise NameError("No such objective function in spotpy")
-
