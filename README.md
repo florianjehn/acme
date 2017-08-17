@@ -2,6 +2,8 @@
 
 **A**utomated **C**onstruction of **M**odels by **E**volution
 
+[![Build Status](https://travis-ci.org/zutn/ACME.svg?branch=master)](https://travis-ci.org/zutn/ACME)
+
 ## Purpose
 ACME is used to automatically construct a lumped, hydrological model for a given discharge, climate and precipitation timeseries. The model will itself will be constructed using the Catchment Modelling Framework [CMF](http://fb09-pasig.umwelt.uni-giessen.de/cmf).
 
