@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+  # command to install dependencies
+install:
+  - pip install spotpy
+  - pip install cmf
+  - python setup.py install
+
+# command to run tests
+script: python acme/tests/genetics_tests.py
+script: python acme/tests/model_generators_tests.py
+script: python acme/tests/visualization_tests.py
