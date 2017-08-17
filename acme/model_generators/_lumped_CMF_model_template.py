@@ -12,14 +12,17 @@ import cmf
 import spotpy
 import os
 import numpy as np
+import _lookup
 
 
 class LumpedModelCMF:
-    def __init__(self, genotype, obj_func, area_catchment):
+    def __init__(self, genotype, area_catchment, obj_func=None):
         """
 
         :param genotype:
         """
+        if obj_func is None:
+            obj_func = _lookup.get_obj_func("nashsutcliffe")
         self.genotype_to_structure(genotype)
         self.objective_function = obj_func
         self.area_catchment = area_catchment
