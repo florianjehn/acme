@@ -10,3 +10,6 @@ crossover, mutation, objective function).
 The structure is created in such a way, that there is always at least one
 connection to the outlet.
 """
+import _lumped_CMF_model_template
+
+
