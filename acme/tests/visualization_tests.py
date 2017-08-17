@@ -3,3 +3,8 @@
 Created on Aug 17 14:18 2017
 @author(s): Florian U. Jehn
 """
+import unittest
+
+class visualisation_tests(unittest.TestCase):
+    def test(self):
+        pass
