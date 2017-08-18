@@ -5,7 +5,7 @@ python:
   # command to install dependencies
 install:
   - pip install spotpy
-  - pip install spotpy
+  - pip install cmf
   - python setup.py install
 
 # command to run tests
