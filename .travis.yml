@@ -10,6 +10,7 @@ install:
   - python setup.py install
 
 # command to run tests
-script: python acme/tests/test_genetic.py
-script: python acme/tests/test_model_generators.py
-script: python acme/tests/test_visualization.py
+script:
+  - python acme/tests/test_genetic.py
+  - python acme/tests/test_model_generators.py
+  - python acme/tests/test_visualization.py
