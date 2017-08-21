@@ -32,7 +32,14 @@ class GeneticTests(unittest.TestCase):
         self.solve(id_to_location_lookup, optimal_sequence)
 
     def test_ulysses16(self):
-        id_to_location_lookup = load_data("ulysses16.tsp")
+        id_to_location_lookup = ({1: [38.24, 20.42], 2: [39.57, 26.15],
+                                  3: [40.56, 25.32], 4: [36.26, 23.12],
+                                  5: [33.48, 10.54], 6: [37.56, 12.19],
+                                  7: [38.42, 13.11], 8: [37.52, 20.44],
+                                  9: [41.23, 9.1], 10: [41.17, 13.05],
+                                  11: [36.08, -5.21], 12: [38.47, 15.13],
+                                  13: [38.15, 15.35], 14: [37.51, 15.17],
+                                  15: [35.49, 14.32], 16: [39.36, 19.56]})
         optimal_sequence = [14, 13, 12, 16, 1, 3, 2, 4, 8, 15, 5, 11, 9, 10,
                             7, 6]
         self.solve(id_to_location_lookup, optimal_sequence)
@@ -119,30 +126,6 @@ def mutate(genes, fn_get_fitness):
         fitness = fn_get_fitness(genes)
         if fitness > initial_fitness:
             return
-
-
-def load_data(local_file_name):
-    """
-    expects:
-    HEADER section before DATA section, all lines start in column 0
-    DATA section element all have space in column 0
-       <space>1 23.45 67.89
-    last line of file is: " EOF"
-    :param local_file_name:
-    :return:
-    """
-    with open(local_file_name, mode="r") as infile:
-        content = infile.read().splitlines()
-    id_to_location_lookup = {}
-    for row in content:
-        if row[0] != " ":  # Avoid headers
-            continue
-        if row == " EOF":
-            break
-
-        id, x, y = row.split(" ")[1:4]
-        id_to_location_lookup[int(id)] = [float(x), float(y)]
-    return id_to_location_lookup
 
 
 def crossover(parent_genes, donor_genes, fn_get_fitness):
