@@ -3,6 +3,12 @@
 Created on Jul 26 13:25 2017
 @author(s): Florian U. Jehn
 """
-pass
+from . import examples
+from . import genetics
+from . import model_generators
+from . import tests
+from . import visualization
+
+__version__ = '0.0.2'
 
 
