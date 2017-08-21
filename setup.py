@@ -5,12 +5,28 @@ Created on Aug 17 14:26 2017
 """
 
 from setuptools import setup
+import acme
+import io
+
+
+def read(*filenames, **kwargs):
+    encoding = kwargs.get('encoding', 'utf-8')
+    sep = kwargs.get('sep', '\n')
+    buf = []
+    for filename in filenames:
+        with io.open(filename, encoding=encoding) as f:
+            buf.append(f.read())
+    return sep.join(buf)
+
+
+long_description = read('README.md')
+
 
 setup(
   name='acme',
-  version='0.0.1',
+  version=acme.__version__,
   description='Automated Construction of Model by Evolution',
-
+  long_description=long_description,
   author='Florian Jehn, Tobias Houska, Philipp Kraft, Alejandro '
           'Chamorro-Chavez and Lutz Breuer',
   author_email='florian.u.jehn@umwelt.uni-giessen.de',
@@ -29,7 +45,6 @@ setup(
         'License :: OSI Approved :: Apache-2.0 License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
