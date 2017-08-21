@@ -1,1 +1,2 @@
-test
+## Dependencies
+This program assumes you have an up to date [SPOTPY](http://fb09-pasig.umwelt.uni-giessen.de/spotpy/) package installed. If you want to create [CMF](http://fb09-pasig.umwelt.uni-giessen.de/cmf) models you also need an up to date CMF version. SPOTPY can be installed with pip. To get CMF you have to follow the instructions [here](http://fb09-pasig.umwelt.uni-giessen.de/cmf/wiki/CmfInstall).
