@@ -226,3 +226,7 @@ class Pair:
 
     def __hash__(self):
         return hash(self.node) * 397 ^ hash(self.adjacent)
+
+
+if __name__ == '__main__':
+    unittest.main()
