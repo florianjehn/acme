@@ -1,0 +1,13 @@
+###### Requirements without Version Specifiers ######
+
+spotpy
+
+cmf
+
+datetime
+
+dateutil
+
+numpy
+
+

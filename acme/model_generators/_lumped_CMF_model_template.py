@@ -4,7 +4,7 @@ Created on Aug 17 09:04 2017
 @author(s): Florian U. Jehn
 
 This template is called from the generator to be used as basis for all
-models which are generated during the evolutio process. Also the class is
+models which are generated during the evolutionary process. Also the class is
 the interface to spotpy.
 """
 import datetime
@@ -12,7 +12,7 @@ import cmf
 import spotpy
 import os
 import numpy as np
-import _lookup
+from dateutil.relativedelta import relativedelta
 
 
 class LumpedModelCMF:
@@ -26,46 +26,89 @@ class LumpedModelCMF:
         self.genotype_to_structure(genotype)
         self.objective_function = obj_func
         self.area_catchment = area_catchment
-        pass
 
+        def basic_layout():
+            pass
+
+        def set_storages():
+            pass
+
+
+
+
+
+
+    def setparameters(self, tr, Vr=0.0, V0=1000., beta=1.0, ETV1=500.,
+                      fETV0=0.0, initVol=100.):
+        """
+        Creates all connections with the parameter values produced by the
+        sampling algorithm.
+        """
+        # Import all
+        c = self.project[0]
+        outlet = self.outlet
+
+        def all_layers():
+            pass
+
+        def second_and_third_layer():
+            pass
+
+        def first_and_third_layer():
+            pass
+
+        def first_and_second_layer():
+            pass
+
+        def only_first_layer():
+            pass
+
+        def only_second_layer():
+            pass
+
+        def only_third_layer():
+            pass
+
+        # Setze den Water-Uptakestress
+        c.set_uptakestress(cmf.VolumeStress(ETV1, ETV1 * fETV0))
+        cmf.kinematic_wave(c.layers[0], outlet, tr / V0, exponent=beta,
+                           residual=Vr, V0=V0)
+        c.layers[0].volume = initVol
+        # TODO: Anpassen an ACME
 
 
     def loadPETQ(self):
         """
-        Lädt Klima und Abfluss aus den entsprechenden Dateien fnQ, fnT, fnP
-
-        MP111 - Änderungsbedarf: Eigentlich keiner
-        Verständlichkeit: gut
-
-        Reference: http://fb09-pasig.umwelt.uni-giessen.de/cmf/wiki/CmfTutTestData
-
+        Loads climata and discharge data from the corresponding files fnQ,
+        fnT and fnP
         """
-        # Fester Modell-Startpunkt
-        begin = datetime.datetime(1979, 1, 1)
+        # Fixed model starting point
+        # Change this if you want a warm up period other than a year
+        begin = self.begin - relativedelta(years=1)
         step = datetime.timedelta(days=1)
-        # Leere Zeitreihen
-        P = cmf.timeseries(begin, step)
-        P.extend(float(Pstr) for Pstr in open(fnP))
+        # empty time series
+        prec = cmf.timeseries(begin, step)
+        prec.extend(float(Pstr.strip("\n")) for Pstr in open(fnP))
 
-        Q = cmf.timeseries(begin, step)
-        Q.extend(float(Qstr) for Qstr in open(fnQ))
+        discharge = cmf.timeseries(begin, step)
+        discharge.extend(float(Qstr.strip("\n")) for Qstr in open(fnQ))
         # Convert m3/s to mm/day
+        area_catchment = 562.41  # Change this when catchment changes!!!
+        discharge *= 86400 * 1e3 / (area_catchment * 1e6)
+        temp = cmf.timeseries(begin, step)
+        temp_min = cmf.timeseries(begin, step)
+        temp_max = cmf.timeseries(begin, step)
 
-        Q *= 86400 * 1e3 / (self.area_catchment * 1e6)
-        T = cmf.timeseries(begin, step)
-        Tmin = cmf.timeseries(begin, step)
-        Tmax = cmf.timeseries(begin, step)
-
-        # Durchlaufen der Zeilen in der Datei
+        # Go through all lines in the file
         for line in open(fnT):
-            columns = line.split('\t')
+            columns = line.strip("\n").split('\t')
             if len(columns) == 3:
-                Tmax.add(float(columns[0]))
-                Tmin.add(float(columns[1]))
-                T.add(float(columns[2]))
+                temp_max.add(float(columns[0]))
+                temp_min.add(float(columns[1]))
+                temp.add(float(columns[2]))
 
-        return P, T, Tmin, Tmax, Q
-    # TODO: Anpassen an ACME
+        return prec, temp, temp_min, temp_max, discharge
+
 
     def make_stations(self, prec, temp, temp_min, temp_max):
         """
@@ -76,8 +119,9 @@ class LumpedModelCMF:
         self.project.use_nearest_rainfall()
 
         # Temperature data
-        meteo = self.project.meteo_stations.add_station('Grebenau avg', (0,
-                                                                         0, 0))
+        meteo = self.project.meteo_stations.add_station('Meteo Station', (0,
+                                                                          0,
+                                                                          0))
         meteo.T = temp
         meteo.Tmin = temp_min
         meteo.Tmax = temp_max
@@ -88,27 +132,7 @@ class LumpedModelCMF:
     # TODO: Anpassen an ACME
 
 
-    def setparameters(self, tr, Vr=0.0, V0=1000., beta=1.0, ETV1=500.,
-                      fETV0=0.0, initVol=100.):
-        """
-        Setzt die Parameter, dabei werden parametrisierte Verbindungen neu erstellt
-
-        MP111 - Änderungsbedarf: Sehr groß, hier werden alle Parameter des Modells gesetzt
-        Verständlichkeit: mittel
-
-        """
-        # Ein paar Abkürzungen um Tipparbeit zu sparen
-        c = self.project[0]
-        outlet = self.outlet
-
-        # Setze den Water-Uptakestress
-        c.set_uptakestress(cmf.VolumeStress(ETV1, ETV1 * fETV0))
-        cmf.kinematic_wave(c.layers[0], outlet, tr / V0, exponent=beta,
-                           residual=Vr, V0=V0)
-        c.layers[0].volume = initVol
-        # TODO: Anpassen an ACME
-
-    def run_model(self):
+    def runmodel(self):
         """
         Starts the model. Used by spotpy
         """
@@ -133,6 +157,15 @@ class LumpedModelCMF:
             return np.array(self.Q[
                             self.begin:self.end + datetime.timedelta(
                                 days=1)])*np.nan
+
+    def test_run(self):
+        """
+        Stars the model one time to determine if there is a connection to
+        the outlet, by recursively cycling through all nodes.
+        :return:
+        """
+        pass
+
 
     def evaluation(self):
         """
