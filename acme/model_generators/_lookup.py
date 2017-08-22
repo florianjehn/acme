@@ -6,6 +6,7 @@ Created on Aug 16 12:52 2017
 This delivers back the functions specified by user.
 """
 import spotpy
+import cmf
 
 
 def get_obj_func(obj_func):
@@ -45,17 +46,18 @@ def get_obj_func(obj_func):
         return spotpy.objectivefunctions.decomposed_mse
     elif obj_func == "kge":
         return spotpy.objectivefunctions.kge
+    elif obj_func == "rsr":
+        return spotpy.objectivefunctions.rsr
     else:
         raise NameError("No such objective function in spotpy")
     
     
-def get_spotpy_algorithm(algorithm):
+def get_algorithm(algorithm):
     """
     Returns the algorithm as specified by algorithm (variable)
 
-
-    :param algorithm: 
-    :return: 
+    :param algorithm: Name of the algorithm
+    :return: spotpy algorithm
     """
     if algorithm == "abc":
         return spotpy.algorithms.abc
@@ -63,3 +65,70 @@ def get_spotpy_algorithm(algorithm):
         return spotpy.algorithms.demcz
     elif algorithm == "dream":
         return spotpy.algorithms.dream
+    elif algorithm == "fast":
+        return spotpy.algorithms.fast
+    elif algorithm == "fscabc":
+        return spotpy.algorithms.fscabc
+    elif algorithm == "lhs":
+        return spotpy.algorithms.lhs
+    elif algorithm == "mc":
+        return spotpy.algorithms.mc
+    elif algorithm == "mcmc":
+        return spotpy.algorithms.mcmc
+    elif algorithm == "mle":
+        return spotpy.algorithms.mle
+    elif algorithm == "rope":
+        return spotpy.algorithms.rope
+    elif algorithm == "sa":
+        return spotpy.algorithms.sa
+    elif algorithm == "sceua":
+        return spotpy.algorithms.sceua
+    else:
+        raise NameError("No such algorithm in spotpy")
+
+
+def get_distribution(distribution):
+    """
+    Returns the distribution as specified by distribution (variable)
+
+    :param distribution: Name of the distribution
+    :return: spotpy distribution
+    """
+    if distribution == "Uniform":
+        return spotpy.parameter.Uniform
+    elif distribution == "Normal":
+        return spotpy.parameter.Normal
+    elif distribution == "logNormal":
+        return spotpy.parameter.logNormal
+    elif distribution == "Chisquare":
+        return spotpy.parameter.Chisquare
+    elif distribution == "Exponential":
+        return spotpy.parameter.Exponential
+    elif distribution == "Gamma":
+        return spotpy.parameter.Gamma
+    elif distribution == "Wald":
+        return spotpy.parameter.Wald
+    elif distribution == "Weibull":
+        return spotpy.parameter.Weibull
+    else:
+        raise NameError("No such distribution in spotpy")
+
+
+def get_evapotranspiration(et):
+    """
+    Returns the method of calculation of the evapotranspiration as specified
+    in "et".
+
+    :param et: name of the evapotranspiration method
+    :return: cmf evapotranspiration method
+    """
+    if et == "Hargreave":
+        return cmf.HargreaveET
+    elif et == "PenmanMonteith":
+        return cmf.PenmanMonteithET
+    elif et == "PriestleyTaylor":
+        return cmf.PriestleyTaylorET
+    elif et == "Turc":
+        return cmf.TurcET
+    else:
+        raise NameError("No such evapotranspiration in CMF")

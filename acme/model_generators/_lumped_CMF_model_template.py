@@ -28,13 +28,7 @@ class LumpedModelCMF:
         self.area_catchment = area_catchment
         pass
 
-    def genotype_to_structure(self, genotype):
-        """
 
-        :param genotype:
-        :return:
-        """
-        pass
 
     def loadPETQ(self):
         """
@@ -73,28 +67,22 @@ class LumpedModelCMF:
         return P, T, Tmin, Tmax, Q
     # TODO: Anpassen an ACME
 
-    def makestations(self, P, T, Tmin, Tmax):
+    def make_stations(self, prec, temp, temp_min, temp_max):
         """
-        Erzeugt die Regenfall und Klimastation
-        P = Zeitreihe Niederschlag
-        T, Tmin, Tmax = Zeitreihe Tägliche Mitteltemperatur, Min und Max
-
-        MP111 - Änderungsbedarf: Eigentlich keiner
-        Verständlichkeit: gut
-
-        Reference: http://fb09-pasig.umwelt.uni-giessen.de/cmf/wiki/CmfTutMeteostation
+        Creates the cmf weather stations
         """
-        rainstation = self.project.rainfall_stations.add('Grebenau avg', P,
-                                                         (0, 0, 0))
+        rainstation = self.project.rainfall_stations.add("Rainfall Station",
+                                                         prec, (0, 0, 0))
         self.project.use_nearest_rainfall()
 
-        # Temperaturdaten
-        meteo = self.project.meteo_stations.add_station('Grebenau avg',
-                                                        (0, 0, 0))
-        meteo.T = T
-        meteo.Tmin = Tmin
-        meteo.Tmax = Tmax
+        # Temperature data
+        meteo = self.project.meteo_stations.add_station('Grebenau avg', (0,
+                                                                         0, 0))
+        meteo.T = temp
+        meteo.Tmin = temp_min
+        meteo.Tmax = temp_max
         self.project.use_nearest_meteo()
+        return rainstation
 
         return rainstation
     # TODO: Anpassen an ACME
@@ -120,69 +108,47 @@ class LumpedModelCMF:
         c.layers[0].volume = initVol
         # TODO: Anpassen an ACME
 
-    def runmodel(self, verbose=False):
+    def run_model(self):
         """
-        Startet das Modell
-
-        verbose = Wenn verbose = True, dann wird zu jedem Tag etwas ausgegeben
-
-        MP111 - Änderungsbedarf: Gering, kann so bleiben, kann aber auch
-                        um andere Ergebniszeitreihen ergänzt werden. Achtung,
-                        falls ihr mehrere Outlets benutzt
-        Verständlichkeit: gut
-
-        Reference: http://fb09-pasig.umwelt.uni-giessen.de/cmf/wiki/CmfTutFluxes
+        Starts the model. Used by spotpy
         """
-        # Erzeugt ein neues Lösungsverfahren
-        solver = cmf.ImplicitEuler(self.project, 1e-9)
-        # Verkürzte schreibweise für die Zelle - spart tippen
-        c = self.project[0]
 
-        # Neue Zeitreihe für Modell-Ergebnisse (res - result)
-        resQ = cmf.timeseries(self.begin, cmf.day)
-        # Starte den solver und rechne in Tagesschritten
-        for t in solver.run(self.project.meteo_stations[0].T.begin, self.end,
-                            cmf.day):
-            # Fülle die Ergebnisse
-            if t >= self.begin:
-                resQ.add(self.outlet.waterbalance(t))
-            # Gebe eine Statusmeldung auf den Bildschirm aus,
-            # dann weiß man wo der solver gerade ist
-            if verbose:
-                print(t, 'Q=%5.3f, P=%5.3f' % (resQ[t], c.get_rainfall(t)))
-        # Gebe die gefüllten Ergebnis-Zeitreihen zurück
-        return resQ
-    # TODO: anpassen an ACME
+        try:
+            # Create a solver for differential equations
+            solver = cmf.CVodeIntegrator(self.project, 1e-8)
 
+            # New time series for model results
+            resQ = cmf.timeseries(self.begin, cmf.day)
+            # starts the solver and calculates the daily time steps
+            end = self.end
+            for t in solver.run(self.project.meteo_stations[0].T.begin, end,
+                                cmf.day):
+                # Fill the results (first year is included but not used to
+                # calculate the NS)
+                if t >= self.begin:
+                    resQ.add(self.outlet.waterbalance(t))
+            return resQ
+        # Return an nan - array when a runtime error occurs
+        except RuntimeError:
+            return np.array(self.Q[
+                            self.begin:self.end + datetime.timedelta(
+                                days=1)])*np.nan
 
     def evaluation(self):
         """
-        Gehört auch zum spotpy-Interface.
-
-        MP111 - Änderungsbedarf: Keiner
-        Verständlichkeit: Schlecht
+        For Spotpy. Creates a numpy array from the evaluation timeseries.
         """
         return np.array(
             self.Q[self.begin:self.end + datetime.timedelta(days=1)])
-        # TODO: anpassen an ACME
-
 
     def parameters(self):
         """
-        Gehört auch zum spotpy-Interface.
-
-        MP111 - Änderungsbedarf: Keiner
-        Verständlichkeit: Schlecht
+        For Spotpy. Tells Spotpy the parameter names and ranges.
         """
         return spotpy.parameter.generate(self.params)
-        # TODO: anpassen an ACME
 
     def objectivefunction(self, simulation, evaluation):
         """
-        Gehört auch zum spotpy-Interface.
-
-        MP111 - Änderungsbedarf: Keiner
-        Verständlichkeit: Mittel
+        For Spotpy. Tells Spotpy how the model is to be evaluated.
         """
         return self.objective_function(evaluation, simulation)
-        # TODO: anpassen an ACME
