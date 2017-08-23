@@ -38,8 +38,7 @@ class LumpedModelCMF:
 
 
 
-    def setparameters(self, tr, Vr=0.0, V0=1000., beta=1.0, ETV1=500.,
-                      fETV0=0.0, initVol=100.):
+    def setparameters(self, **kwargs):
         """
         Creates all connections with the parameter values produced by the
         sampling algorithm.
