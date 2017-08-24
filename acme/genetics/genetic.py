@@ -237,8 +237,6 @@ def _generate_parent(length, gene_set, get_fitness):
     # object which contains the genes and the fitness combined.
     fitness = get_fitness(genes)
     return Chromosome(genes, fitness, Strategies.create)
-    # TODO: Devise a way to create CMF Model parents which certainly have a
-    # TODO: connection to the outlet.
 
 
 def _mutate(parent, gene_set, get_fitness):

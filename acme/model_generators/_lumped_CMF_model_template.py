@@ -16,7 +16,7 @@ from dateutil.relativedelta import relativedelta
 
 
 class LumpedModelCMF:
-    def __init__(self, genotype, area_catchment, obj_func=None):
+    def __init__(self, genes, data, obj_func=None):
         """
 
         :param genotype:
@@ -74,40 +74,6 @@ class LumpedModelCMF:
                            residual=Vr, V0=V0)
         c.layers[0].volume = initVol
         # TODO: Anpassen an ACME
-
-
-    def loadPETQ(self):
-        """
-        Loads climata and discharge data from the corresponding files fnQ,
-        fnT and fnP
-        """
-        # Fixed model starting point
-        # Change this if you want a warm up period other than a year
-        begin = self.begin - relativedelta(years=1)
-        step = datetime.timedelta(days=1)
-        # empty time series
-        prec = cmf.timeseries(begin, step)
-        prec.extend(float(Pstr.strip("\n")) for Pstr in open(fnP))
-
-        discharge = cmf.timeseries(begin, step)
-        discharge.extend(float(Qstr.strip("\n")) for Qstr in open(fnQ))
-        # Convert m3/s to mm/day
-        area_catchment = 562.41  # Change this when catchment changes!!!
-        discharge *= 86400 * 1e3 / (area_catchment * 1e6)
-        temp = cmf.timeseries(begin, step)
-        temp_min = cmf.timeseries(begin, step)
-        temp_max = cmf.timeseries(begin, step)
-
-        # Go through all lines in the file
-        for line in open(fnT):
-            columns = line.strip("\n").split('\t')
-            if len(columns) == 3:
-                temp_max.add(float(columns[0]))
-                temp_min.add(float(columns[1]))
-                temp.add(float(columns[2]))
-
-        return prec, temp, temp_min, temp_max, discharge
-
 
     def make_stations(self, prec, temp, temp_min, temp_max):
         """

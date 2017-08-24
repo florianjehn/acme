@@ -17,9 +17,24 @@ import datetime
 
 
 class LumpedCMFGenerator:
-    def __init__(self, start_year, end_year, validation_time_span,
-                 obj_func, Distribution, algorithm, et, prec, t_mean, t_min,
+    def __init__(self, start_year, 
+                 end_year, 
+                 validation_time_span,
+
+                 obj_func,
+                 optimal_fitness,
+                 Distribution, 
+                 algorithm, 
+                 et,
+                 
+                 prec, 
+                 discharge, 
+                 t_mean, 
+                 t_min, 
                  t_max,
+
+                 max_age=50,
+                 pool_size=10
                  ):
         """
         Sets everything up, ready to be solved.
@@ -39,17 +54,20 @@ class LumpedCMFGenerator:
         self.end_year = end_year
         self.validation_time_span = validation_time_span
         # Get the functions and classes the match the user specified inputs.
-        self.obj_func = lookup(obj_func)
-        self.Distribution = lookup(Distribution)
-        self.algorithm = lookup(algorithm)
-        self.et = lookup(et)
-        # Climate data
-        self.prec = prec
-        self.t_mean = t_mean
-        self.t_min = t_min
-        self.t_max = t_max
-
-        # Define gen pool
+        self.obj_func = lookup.get_obj_func(obj_func)
+        self.optimal_fitness = optimal_fitness
+        self.Distribution = lookup.get_distribution(Distribution)
+        self.algorithm = lookup.get_algorithm(algorithm)
+        self.et = lookup.get_evapotranspiration(et)
+        # Forcing data
+        self.data = {
+            "prec": prec, 
+            "discharge": discharge,
+            "t_mean": t_mean,
+            "t_min": t_min,
+            "t_max": t_max
+        }
+        # Define gen set
         # This is done so widespread to make it more readable and also allow
         #  it later to check for what is in what.
         self.storages = ["snow", "canopy", "first_layer", "second_layer",
@@ -68,19 +86,47 @@ class LumpedCMFGenerator:
                        self.et_params + self. first_layer_params +
                        self.second_layer_params + self.third_layer_params +
                        self.river_params)
-        self.gen_pool = self.storages + self.connections + self.params
+        self.gene_set = self.storages + self.connections + self.params
 
-
-
-
+        # Arguments for genetics behaviour
+        self.max_age = max_age
+        self.pool_size = pool_size
+        
     def solve(self):
         """
         Starts the process of model selection.
 
         Calls the genetic file with all needed informations.
-        :return:
+        :return: None, but writes the best found model to a file
         """
-        pass
+        # Helper functions as interface
+        data = self.data
+        gene_set = self.gene_set
+        def fn_create():
+            return create(gene_set)
+
+        def fn_display(candidate, start_time):
+            display(candidate, start_time)
+
+        def fn_get_fitness(genes):
+            return get_fitness(genes, data)
+
+        def fn_mutate(genes):
+            mutate(genes, fn_get_fitness)
+
+        def fn_crossover(parent, donor):
+            return crossover(parent, donor, fn_get_fitness)
+
+        start_time = datetime.datetime.now()
+        best = genetic.get_best(fn_get_fitness, None, self.optimal_fitness,
+                                None, fn_display, fn_mutate, fn_create,
+                                max_age=self.max_age,
+                                pool_size=self.pool_size,
+                                crossover=fn_crossover)
+        while not self.optimal_fitness > best.fitness:
+            pass
+
+        write_best_model(best)
 
 
 def get_fitness(obj_func, evaluation, simulation):
@@ -88,6 +134,7 @@ def get_fitness(obj_func, evaluation, simulation):
     Calculates the fitness of a given genotype.
     :return:
     """
+    model = template.LumpedModelCMF()
     return obj_func(evaluation, simulation)
 
 
@@ -111,10 +158,34 @@ def mutate(genes, fn_get_fitness):
     :param fn_get_fitness:
     :return:
     """
+    pass
 
 
-def crossover():
+def crossover(parent, donor, get_fitness):
     """
     Performs a crossover between to genotypes.
     :return:
     """
+    pass
+
+
+def create(gene_set):
+    """
+    Creates a genotype after given rules.
+    
+    Allows creation in such a way, that a connection to the outlet is 
+    guaranteed. 
+    :param gene_set: all possible genes for a model
+    :return: a genotype of a model
+    """
+    pass
+
+
+def write_best_model(genes):
+    """
+    Writes the best model to a file.
+
+    :param genes:
+    :return:
+    """
+    pass
