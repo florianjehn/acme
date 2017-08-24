@@ -14,6 +14,7 @@ import acme.model_generators._lumped_CMF_model_template as template
 import acme.model_generators._lookup as lookup
 import acme.genetics.genetic as genetic
 import datetime
+import random
 
 
 class LumpedCMFGenerator:
@@ -159,14 +160,15 @@ def display(candidate, start_time):
         candidate.fitness, candidate.Strategy.name, time_diff))
 
 
-def mutate(genes, fn_get_fitness):
+def mutate(genes, gene_set, fn_get_fitness):
     """
     Mutates a genome
-    :param genes:
+    :param genes: genes of a given individual
+    :param gene_set: all possible genes.
     :param fn_get_fitness:
     :return:
     """
-    pass
+    return genes
 
 
 def crossover(parent, donor, get_fitness):
