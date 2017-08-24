@@ -55,7 +55,7 @@ class Strategies(Enum):
 
 def get_best(get_fitness, target_len, optimal_fitness, gene_set, display,
              custom_mutate=None, custom_create=None, max_age=None,
-             pool_size=1, crossover=None, max_seconds=None):
+             pool_size=1, crossover=None):
     """
     Reusable genetic engine to find the best solution for a given fitness.
     Responsible for displaying improvements and breaking the loop.

@@ -17,20 +17,20 @@ import datetime
 
 
 class LumpedCMFGenerator:
-    def __init__(self, start_year, 
-                 end_year, 
+    def __init__(self, start_year,
+                 end_year,
                  validation_time_span,
 
                  obj_func,
                  optimal_fitness,
-                 Distribution, 
-                 algorithm, 
+                 Distribution,
+                 algorithm,
                  et,
-                 
-                 prec, 
-                 discharge, 
-                 t_mean, 
-                 t_min, 
+
+                 prec,
+                 discharge,
+                 t_mean,
+                 t_min,
                  t_max,
 
                  max_age=50,
@@ -146,7 +146,7 @@ def display(candidate, start_time):
     :return:
     """
     time_diff = datetime.datetime.now() - start_time
-    print("{}\t{}\t{}\t{}".format(
+    print("Genes: {}\t\nFit: {}\tStrategy: {}\tTime: {}".format(
         " ".join(map(str, candidate.genes)),
         candidate.fitness, candidate.Strategy.name, time_diff))
 

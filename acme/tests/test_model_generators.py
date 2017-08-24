@@ -5,6 +5,7 @@ Created on Aug 17 14:17 2017
 """
 import unittest
 from acme.model_generators import create_lumped_CMF_model as generator
+import acme.genetics as genetics
 import cmf
 import datetime
 
@@ -37,7 +38,9 @@ class generators_tests(unittest.TestCase):
         pass
 
     def test_display(self):
-        pass
+        start_time = datetime.datetime.now() - datetime.timedelta(0,3)
+        candidate = genetics.genetic.Chromosome(["snow", "first_layer"], 0.8, genetics.genetic.Strategies.create)
+        generator.display(candidate, start_time)
 
     def test_mutation(self):
         pass
