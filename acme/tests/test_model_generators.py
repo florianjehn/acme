@@ -38,6 +38,9 @@ class generators_tests(unittest.TestCase):
         pass
 
     def test_display(self):
+        """
+        Calls the display function with one test set to determine if it works at all. Cannot determine if the output is as expected. This has to checked manually.
+        """
         start_time = datetime.datetime.now() - datetime.timedelta(0,3)
         candidate = genetics.genetic.Chromosome(["snow", "first_layer"], 0.8, genetics.genetic.Strategies.create)
         generator.display(candidate, start_time)

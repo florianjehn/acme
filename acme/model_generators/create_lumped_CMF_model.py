@@ -99,9 +99,13 @@ class LumpedCMFGenerator:
         Calls the genetic file with all needed informations.
         :return: None, but writes the best found model to a file
         """
-        # Helper functions as interface
+        # Make the needed variables available for the helper functions.
         data = self.data
         gene_set = self.gene_set
+        obj_func = self.obj_func
+
+        # Helper functions used as interface to genetic.
+
         def fn_create():
             return create(gene_set)
 
@@ -109,7 +113,7 @@ class LumpedCMFGenerator:
             display(candidate, start_time)
 
         def fn_get_fitness(genes):
-            return get_fitness(genes, data)
+            return get_fitness(genes, data, obj_func)
 
         def fn_mutate(genes):
             mutate(genes, fn_get_fitness)
@@ -129,13 +133,17 @@ class LumpedCMFGenerator:
         write_best_model(best)
 
 
-def get_fitness(obj_func, evaluation, simulation):
+def get_fitness(genes, data, obj_func):
     """
     Calculates the fitness of a given genotype.
     :return:
     """
+    ### First run the model with a row of default parameters for a few days and then cycle through it recurevily. Then check if a outlet is inside the model. If not assign it a fitness value of  a negative big number.
+    ### If the model has a outlet let it then run normally.
+    ### One could even make it this way, that this functions here just gets bkac the whole run table of the model and filters out the highest value for "like1" and returns it.
+
+
     model = template.LumpedModelCMF()
-    return obj_func(evaluation, simulation)
 
 
 def display(candidate, start_time):
