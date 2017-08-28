@@ -18,6 +18,26 @@ import random
 
 
 class LumpedCMFGenerator:
+    storages = ["snow", "canopy", "second_layer",
+                     "third_layer", "river"]
+    connections = ["tr_first_out", "tr_first_river", "tr_first_third",
+                        "tr_second_third", "tr_second_river_or_out",
+                        "tr_third_river_or_out", "river_out"]
+    snow_params = ["meltrate", "snow_melt_temp"]
+    canopy_params = ["lai", "canopy_closure"]
+    et_params = ["etv0", "fetv0"]
+    first_layer_params = ["beta_first_out", "beta_first_river",
+                               "beta_first_second"]
+    second_layer_params = ["beta_second_river", "beta_second_third"]
+    third_layer_params = ["beta_third_river"]
+    river_params = ["beta_river_out"]
+    params = (snow_params + canopy_params +
+              et_params + first_layer_params +
+              second_layer_params + third_layer_params +
+              river_params)
+    gene_set = storages + connections + params
+
+
     def __init__(self, start_year,
                  end_year,
                  validation_time_span,
@@ -76,8 +96,9 @@ class LumpedCMFGenerator:
         # sense
         self.storages = ["snow", "canopy", "second_layer",
                          "third_layer", "river"]
-        self.connections = ["first_out", "first_river", "first_third",
-                            "second_third", "second_river", "third_river"]
+        self.connections = ["tr_first_out", "tr_first_river", "tr_first_third",
+                            "tr_second_third", "tr_second_river_or_out",
+                            "tr_third_river_or_out", "river_out"]
         self.snow_params = ["meltrate", "snow_melt_temp"]
         self.canopy_params = ["lai", "canopy_closure"]
         self.et_params = ["etv0", "fetv0"]
@@ -154,9 +175,9 @@ def get_fitness(genes, data, obj_func):
 def display(candidate, start_time):
     """
     Display the current candidate and his fitness
-    :param candidate:
-    :param start_time:
-    :return:
+    :param candidate: Model/genotype that is to be displayed
+    :param start_time: Time when the current program started
+    :return: None
     """
     time_diff = datetime.datetime.now() - start_time
     print("Genes: {}\t\nFit: {}\tStrategy: {}\tTime: {}".format(
@@ -170,7 +191,7 @@ def mutate(genes, gene_set):
     :param genes: genes of a given individual
     :param gene_set: all possible genes.
     :param fn_get_fitness:
-    :return:
+    :return: None (the list is directly manipulated)
     """
     mutation_type = random.choice(["add", "del", "swap"])
     max_changes = 3
@@ -212,8 +233,11 @@ def mutate(genes, gene_set):
 
 def crossover(first_parent, second_parent):
     """
-    Performs a crossover between to genotypes.
-    :return:
+    Performs a crossover between to genotypes. A single point crossover is
+    used.
+    :param first_parent: genotype of the first parent (list)
+    :param second_parent: genotype of the second parent (list)
+    :return: a new genotype (list)
     """
     # Select two random points in the length of the parent and donor genome
     index_first_parent = random.randint(len(first_parent))
@@ -239,6 +263,10 @@ def create(gene_set):
     :param gene_set: all possible genes for a model
     :return: a genotype of a model
     """
+    #
+
+
+
     pass
 
 
@@ -250,3 +278,23 @@ def write_best_model(genes):
     :return:
     """
     pass
+
+
+def check_for_connection(genes):
+    """
+    Determines if a there is a connection to the outlet and if not creates one.
+
+    :param genes:
+    :return:
+    """
+    to_outlet = False
+    outgoing = []
+    for connection in LumpedCMFGenerator.connections:
+        if "out" in connection:
+            outgoing.append(connection)
+    for connection in outgoing:
+        if connection in genes:
+            to_outlet = True
+            break
+    if not to_outlet:
+        genes.append("tr_first_out")
