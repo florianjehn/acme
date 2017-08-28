@@ -100,7 +100,26 @@ class generators_tests(unittest.TestCase):
                         )
 
 
+    def test_check_for_connection_outlet_present(self):
+        """
+        Tests if the the function check_for_connection can detect that an
+        outlet is missing and then add it.
+        :return: None
+        """
+        genes = ["snow", "river"]
+        generator.check_for_connection(genes)
+        self.assertTrue("tr_first_out" in genes and len(genes) == 3)
 
+    def test_check_for_connection_outlet_not_present(self):
+        """
+        Tests if the the function check_for_connection can detect that an
+        outlet is present and leave the genes unchanged.
+        :return: None
+        """
+        genes = ["snow", "river", "tr_first_out"]
+        genes_copy = genes[:]
+        generator.check_for_connection(genes)
+        self.assertTrue(genes == genes_copy)
 
     def test_crossover(self):
         pass
