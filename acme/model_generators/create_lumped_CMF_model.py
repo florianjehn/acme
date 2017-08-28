@@ -71,8 +71,11 @@ class LumpedCMFGenerator:
         # Define gen set
         # This is done so widespread to make it more readable and also allow
         #  it later to check for what is in what.
-        self.storages = ["snow", "canopy", "first_layer", "second_layer",
-                    "third_layer", "river"]
+
+        # "first_layer" is excluded, as a model wihout any storage makes no
+        # sense
+        self.storages = ["snow", "canopy", "second_layer",
+                         "third_layer", "river"]
         self.connections = ["first_out", "first_river", "first_third",
                             "second_third", "second_river", "third_river"]
         self.snow_params = ["meltrate", "snow_melt_temp"]
@@ -144,7 +147,8 @@ def get_fitness(genes, data, obj_func):
     ### One could even make it this way, that this functions here just gets bkac the whole run table of the model and filters out the highest value for "like1" and returns it.
 
 
-    model = template.LumpedModelCMF()
+    #model = template.LumpedModelCMF()
+    return 1
 
 
 def display(candidate, start_time):
@@ -168,7 +172,21 @@ def mutate(genes, gene_set, fn_get_fitness):
     :param fn_get_fitness:
     :return:
     """
-    return genes
+    mutation_type = random.choice(["add", "del", "swap"])
+    if mutation_type == "add":
+        while True:
+            new_gene = random.choice(gene_set)
+            # Check if the random choice to avoid adding it again
+            if new_gene not in genes:
+                genes.append(new_gene)
+                break
+            # If the genes already contains all possible genes, delete one gene
+            if set(genes) == set(gene_set):
+                genes.pop(random.randrange(len(genes)))
+    # elif mutation_type == "del":
+    #     if
+
+    return
 
 
 def crossover(parent, donor, get_fitness):
@@ -176,6 +194,13 @@ def crossover(parent, donor, get_fitness):
     Performs a crossover between to genotypes.
     :return:
     """
+    # Select two random points in the length of the parent and donor genome
+    # Take all the genes from before the point from parent and all the genes
+    #  from behind the point from behind the point
+    # Create a set out of it to avoid duplicates
+    # then turn it back to a list and return it
+
+
     pass
 
 

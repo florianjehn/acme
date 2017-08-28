@@ -13,6 +13,7 @@ import spotpy
 import os
 import numpy as np
 from dateutil.relativedelta import relativedelta
+import acme.model_generators._lookup as _lookup
 
 
 class LumpedModelCMF:
@@ -28,6 +29,7 @@ class LumpedModelCMF:
         self.area_catchment = area_catchment
 
         def basic_layout():
+            # include first_layer here, so the model has at least one storage
             pass
 
         def set_storages():

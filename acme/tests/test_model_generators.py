@@ -9,6 +9,7 @@ import acme.genetics as genetics
 import datetime
 import copy
 import cmf
+import math
 
 
 class generators_tests(unittest.TestCase):
@@ -74,19 +75,29 @@ class generators_tests(unittest.TestCase):
         count_add = 0
         count_del = 0
         count_swap = 0
-        for i in range(1000):
+        reputations = 1000
+        for i in range(reputations):
             genes_copy = copy.deepcopy(genes)
             genes_copy = generator.mutate(genes_copy, self.gene_set,
                                           generator.get_fitness)
-            if len(genes_copy) == len(genes) + 1:
+            if len(genes_copy) > len_before + 1:
                 count_add += 1
-            elif len(genes_copy) == len(genes) - 1:
+            elif len(genes_copy) < len_before - 1:
                 count_del += 1
-            elif len(genes_copy) == len(genes):
+            elif len(genes_copy) == len_before:
                 count_swap += 1
-
-        self.assertTrue(325 < count_add < 340 and 325 < count_del
-                        < 340 and 325 < count_swap < 340)
+        print("Added: {}\tDeleted:{}\tSwapped:{}".format(count_add,
+                                                         count_del,
+                                                         count_swap))
+        self.assertTrue(math.isclose(count_add, len_before,
+                                     abs_tol=reputations * 0.05)
+                        and
+                        math.isclose(count_del, len_before,
+                                     abs_tol=reputations * 0.05)
+                        and
+                        math.isclose(count_swap, len_before,
+                                     abs_tol=reputations * 0.05)
+                        )
 
 
 
@@ -112,10 +123,11 @@ def load_data(fnQ, fnT, fnP, area_catchment):
     step = datetime.timedelta(days=1)
     # empty time series
     P = cmf.timeseries(begin, step)
-    P.extend(float(Pstr) for Pstr in open(fnP))
-
+    with open(fnP) as fnP_file:
+        P.extend(float(Pstr) for Pstr in fnP_file)
     Q = cmf.timeseries(begin, step)
-    Q.extend(float(Qstr) for Qstr in open(fnQ))
+    with open(fnQ) as fnQ_file:
+        Q.extend(float(Qstr) for Qstr in fnQ_file)
     # Convert m3/s to mm/day
     Q *= 86400 * 1e3 / (area_catchment * 1e6)
     T = cmf.timeseries(begin, step)
@@ -123,11 +135,13 @@ def load_data(fnQ, fnT, fnP, area_catchment):
     Tmax = cmf.timeseries(begin, step)
 
     # Go through all lines in the file
-    for line in open(fnT):
-        columns = line.split('\t')
-        if len(columns) == 3:
-            Tmax.add(float(columns[0]))
-            Tmin.add(float(columns[1]))
-            T.add(float(columns[2]))
+    with open(fnT) as fnT_file:
+        for line in fnT_file:
+            columns = line.split('\t')
+            if len(columns) == 3:
+                Tmax.add(float(columns[0]))
+                Tmin.add(float(columns[1]))
+                T.add(float(columns[2]))
+
 
     return P, T, Tmin, Tmax, Q
