@@ -113,7 +113,7 @@ class LumpedCMFGenerator:
         def fn_create():
             return create(gene_set)
 
-        def fn_display(candidate, start_time):
+        def fn_display(candidate):
             display(candidate, start_time)
 
         def fn_get_fitness(genes):
@@ -173,19 +173,38 @@ def mutate(genes, gene_set, fn_get_fitness):
     :return:
     """
     mutation_type = random.choice(["add", "del", "swap"])
+    max_changes = 3
     if mutation_type == "add":
-        while True:
-            new_gene = random.choice(gene_set)
-            # Check if the random choice to avoid adding it again
-            if new_gene not in genes:
-                genes.append(new_gene)
-                break
-            # If the genes already contains all possible genes, delete one gene
+        for _ in random.randint(1, max_changes):
+            # If the genes already contains all possible genes,
+            # skip the process
             if set(genes) == set(gene_set):
-                genes.pop(random.randrange(len(genes)))
-    # elif mutation_type == "del":
-    #     if
+                break
+            while True:
+                new_gene = random.choice(gene_set)
+                # Check if the random choice to avoid adding it again
+                if new_gene not in genes:
+                    genes.append(new_gene)
+                    break
 
+    elif mutation_type == "del":
+        for _ in random.randint(1, max_changes):
+            # Pick a random genes
+            genes = random.shuffle(genes)
+            genes.pop()
+
+    elif mutation_type == "swap":
+        for _ in random.randint(1, max_changes):
+            # Make a copy of the parent genes
+            initial_genes = genes[:]
+            # create a index for a random place in the parent genome
+            index = random.randrange(0, len(genes))
+            # take two random samples out of the gene set
+            new_gene, alternate = random.sample(gene_set, 2)
+            # replace the gene at index with another one, if it is randomly the
+            # same, exchange it with the alternative.
+            initial_genes[index] = (alternate if new_gene == initial_genes[index]
+                                  else new_gene)
     return
 
 

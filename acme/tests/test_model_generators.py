@@ -68,7 +68,7 @@ class generators_tests(unittest.TestCase):
         and ~ 333 genotypes should have one gene replaced by another one.
         :return:
         """
-        genes = ["snow", "first_layer", "second_layer",
+        genes = ["snow", "second_layer",
                  "third_layer", "river", "first_out", "first_river",
                  "first_third", "second_third", "second_river", "third_river"]
         len_before = len(genes)
@@ -86,7 +86,7 @@ class generators_tests(unittest.TestCase):
                 count_del += 1
             elif len(genes_copy) == len_before:
                 count_swap += 1
-        print("Added: {}\tDeleted:{}\tSwapped:{}".format(count_add,
+        print("Added: {}\tDeleted:{}\tSwapped:{}\n\n".format(count_add,
                                                          count_del,
                                                          count_swap))
         self.assertTrue(math.isclose(count_add, len_before,
@@ -116,7 +116,8 @@ class generators_tests(unittest.TestCase):
 
 def load_data(fnQ, fnT, fnP, area_catchment):
     """
-    Loads climata and discharge data from the corresponding files fnQ, fnT and fnP
+    Loads climata and discharge data from the corresponding files fnQ, fnT and
+    fnP
     """
     # Fixed model starting point
     begin = datetime.datetime(1979, 1, 1)
@@ -142,6 +143,5 @@ def load_data(fnQ, fnT, fnP, area_catchment):
                 Tmax.add(float(columns[0]))
                 Tmin.add(float(columns[1]))
                 T.add(float(columns[2]))
-
 
     return P, T, Tmin, Tmax, Q
