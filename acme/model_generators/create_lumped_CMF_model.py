@@ -5,7 +5,7 @@ Created on Aug 15 13:28 2017
 
 This file is used to start the construction of a predefined CMF model. The
 user only has to provide the forcing data and the kind of techniques (
-crossover, mutation, objective function).
+Distribution, objective function, etc.).
 
 The structure is created in such a way, that there is always at least one
 connection to the outlet.
@@ -164,7 +164,7 @@ def display(candidate, start_time):
         candidate.fitness, candidate.Strategy.name, time_diff))
 
 
-def mutate(genes, gene_set, fn_get_fitness):
+def mutate(genes, gene_set):
     """
     Mutates a genome
     :param genes: genes of a given individual
@@ -203,24 +203,31 @@ def mutate(genes, gene_set, fn_get_fitness):
             new_gene, alternate = random.sample(gene_set, 2)
             # replace the gene at index with another one, if it is randomly the
             # same, exchange it with the alternative.
-            initial_genes[index] = (alternate if new_gene == initial_genes[index]
-                                  else new_gene)
+            initial_genes[index] = (alternate if new_gene ==
+                                    initial_genes[index]
+                                    else
+                                    new_gene)
     return
 
 
-def crossover(parent, donor, get_fitness):
+def crossover(first_parent, second_parent):
     """
     Performs a crossover between to genotypes.
     :return:
     """
     # Select two random points in the length of the parent and donor genome
+    index_first_parent = random.randint(len(first_parent))
+    index_second_parent = random.randint(len(second_parent))
     # Take all the genes from before the point from parent and all the genes
-    #  from behind the point from behind the point
+    # from behind the point from behind the point
+    part_first_parent = first_parent[:index_first_parent]
+    part_second_parent = second_parent[index_second_parent:]
+    # Combine the parts
+    child_genes = part_first_parent + part_second_parent
     # Create a set out of it to avoid duplicates
     # then turn it back to a list and return it
-
-
-    pass
+    child_genes = list(set(child_genes))
+    return child_genes
 
 
 def create(gene_set):
