@@ -36,3 +36,10 @@ Or if you are up to a bit larger challenge it is also possible to rewrite the co
 
 ## Important Dependencies
 This program assumes you have an up to date [SPOTPY](http://fb09-pasig.umwelt.uni-giessen.de/spotpy/) package installed. If you want to create [CMF](http://fb09-pasig.umwelt.uni-giessen.de/cmf) models you also need an up to date CMF version. SPOTPY can be installed with pip. To get CMF you have to follow the instructions [here](http://fb09-pasig.umwelt.uni-giessen.de/cmf/wiki/CmfInstall).
+
+## License
+This project is released unter the Apache 2 license. If you are wondering what this means, here is a short explanation:
+
+"The Apache license says “do whatever you want with this, just don’t sue me” but does so with many more words, which lawyers like because it adds specificity. It also contains a patent license and retaliation clause which is designed to prevent patents (including patent trolls) from encumbering the software project." 
+
+(Taken from [here](https://exygy.com/which-license-should-i-use-mit-vs-apache-vs-gpl/))
