@@ -12,23 +12,23 @@ import cmf
 import math
 
 
-class generators_tests(unittest.TestCase):
-
-    gene_set = ["snow", "canopy", "first_layer", "second_layer",
-                     "third_layer", "river", "first_out", "first_river",
-                     "first_third", "second_third", "second_river",
-                     "third_river", "meltrate", "snow_melt_temp", "lai",
-                     "canopy_closure", "etv0", "fetv0", "beta_first_out",
-                     "beta_first_river", "beta_first_second",
-                     "beta_second_river", "beta_second_third",
-                     "beta_third_river", "beta_river_out"]
+class GeneratorsTests(unittest.TestCase):
+    gene_set = ["snow", "canopy", "second_layer",
+                "third_layer", "river", "first_out", "first_river",
+                "first_third", "second_third", "second_river",
+                "third_river", "meltrate", "snow_melt_temp", "lai",
+                "canopy_closure", "etv0", "fetv0", "beta_first_out",
+                "beta_first_river", "beta_first_second",
+                "beta_second_river", "beta_second_third",
+                "beta_third_river", "beta_river_out"]
 
     def test_solve(self):
         area_catchment = 2976.41
-        fnQ = "GrebenauQTagMittel__1979_1990.txt"
-        fnT = "Temp_max_min_avg_1979_1988.txt"
-        fnP = "Prec_Grebenau_1979_1988.txt"
-        P, T, Tmin, Tmax, Q = load_data(fnQ, fnT, fnP, area_catchment)
+        discharge_file = "GrebenauQTagMittel__1979_1990.txt"
+        temperature_file = "Temp_max_min_avg_1979_1988.txt"
+        precipitation_file = "Prec_Grebenau_1979_1988.txt"
+        P, T, Tmin, Tmax, Q = load_data(discharge_file, temperature_file,
+                                        precipitation_file, area_catchment)
 
         lumped_model_generator = generator.LumpedCMFGenerator(
             1980,
@@ -87,8 +87,8 @@ class generators_tests(unittest.TestCase):
             elif len(genes_copy) == len_before:
                 count_swap += 1
         print("Added: {}\tDeleted:{}\tSwapped:{}\n\n".format(count_add,
-                                                         count_del,
-                                                         count_swap))
+                                                             count_del,
+                                                             count_swap))
         self.assertTrue(math.isclose(count_add, len_before,
                                      abs_tol=reputations * 0.05)
                         and
@@ -98,7 +98,6 @@ class generators_tests(unittest.TestCase):
                         math.isclose(count_swap, len_before,
                                      abs_tol=reputations * 0.05)
                         )
-
 
     def test_check_for_connection_outlet_present(self):
         """
@@ -121,8 +120,22 @@ class generators_tests(unittest.TestCase):
         generator.check_for_connection(genes)
         self.assertTrue(genes == genes_copy)
 
-    def test_crossover(self):
-        pass
+    def test_crossover_list_properties(self):
+        """
+        Tests if the returned value of crossover is a non empty list.
+        :return: None
+        """
+        first_parent = ["snow", "second_layer", "canopy"]
+        second_parent = ["snow", "canopy", "third_layer", "second_layer"]
+        child = generator.crossover(first_parent, second_parent)
+        self.assertTrue(len(child) > 0 and isinstance(child, list))
+
+    def test_crossover_no_duplicates(self):
+        """
+        Tests that the crossover method does not allow duplicates in the
+        genotype.
+        :return: None
+        """
 
     def test_create(self):
         pass
@@ -131,36 +144,36 @@ class generators_tests(unittest.TestCase):
         pass
 
 
-
-
-def load_data(fnQ, fnT, fnP, area_catchment):
+def load_data(discharge_file, temperature_file, precipitation_file, area_catchment):
     """
-    Loads climata and discharge data from the corresponding files fnQ, fnT and
-    fnP
+    Loads climata and discharge data from the corresponding files
+    discharge_file, temperature_file and precipitation_file
     """
     # Fixed model starting point
     begin = datetime.datetime(1979, 1, 1)
     step = datetime.timedelta(days=1)
     # empty time series
-    P = cmf.timeseries(begin, step)
-    with open(fnP) as fnP_file:
-        P.extend(float(Pstr) for Pstr in fnP_file)
-    Q = cmf.timeseries(begin, step)
-    with open(fnQ) as fnQ_file:
-        Q.extend(float(Qstr) for Qstr in fnQ_file)
+    precipitation = cmf.timeseries(begin, step)
+    with open(precipitation_file) as precipitation_file_file:
+        precipitation.extend(float(precipitation_str) for precipitation_str in
+                             precipitation_file_file)
+    discharge = cmf.timeseries(begin, step)
+    with open(discharge_file) as discharge_file_file:
+        discharge.extend(float(discharge_str) for discharge_str in
+                         discharge_file_file)
     # Convert m3/s to mm/day
-    Q *= 86400 * 1e3 / (area_catchment * 1e6)
-    T = cmf.timeseries(begin, step)
-    Tmin = cmf.timeseries(begin, step)
-    Tmax = cmf.timeseries(begin, step)
+    discharge *= 86400 * 1e3 / (area_catchment * 1e6)
+    temperature_avg = cmf.timeseries(begin, step)
+    temperature_min = cmf.timeseries(begin, step)
+    temperature_max = cmf.timeseries(begin, step)
 
     # Go through all lines in the file
-    with open(fnT) as fnT_file:
-        for line in fnT_file:
+    with open(temperature_file) as temperature_file_file:
+        for line in temperature_file_file:
             columns = line.split('\t')
             if len(columns) == 3:
-                Tmax.add(float(columns[0]))
-                Tmin.add(float(columns[1]))
-                T.add(float(columns[2]))
+                temperature_max.add(float(columns[0]))
+                temperature_min.add(float(columns[1]))
+                temperature_avg.add(float(columns[2]))
 
-    return P, T, Tmin, Tmax, Q
+    return precipitation, temperature_avg, temperature_min, temperature_max, discharge

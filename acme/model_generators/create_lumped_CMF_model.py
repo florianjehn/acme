@@ -18,16 +18,21 @@ import random
 
 
 class LumpedCMFGenerator:
-    storages = ["snow", "canopy", "second_layer",
-                     "third_layer", "river"]
+    # Define gen set
+    # This is done so widespread to make it more readable and also allow
+    #  it later to check for what is in what.
+    # "first_layer" is excluded, as a model without any storage makes no sense.
+    # The possible parameters are defined for the class as a whole as they
+    # are equal for all instances and are easier to access this way.
+    storages = ["snow", "canopy", "second_layer", "third_layer", "river"]
     connections = ["tr_first_out", "tr_first_river", "tr_first_third",
-                        "tr_second_third", "tr_second_river_or_out",
-                        "tr_third_river_or_out", "river_out"]
+                   "tr_second_third", "tr_second_river_or_out",
+                   "tr_third_river_or_out", "river_out"]
     snow_params = ["meltrate", "snow_melt_temp"]
     canopy_params = ["lai", "canopy_closure"]
     et_params = ["etv0", "fetv0"]
     first_layer_params = ["beta_first_out", "beta_first_river",
-                               "beta_first_second"]
+                          "beta_first_second"]
     second_layer_params = ["beta_second_river", "beta_second_third"]
     third_layer_params = ["beta_third_river"]
     river_params = ["beta_river_out"]
@@ -36,7 +41,6 @@ class LumpedCMFGenerator:
               second_layer_params + third_layer_params +
               river_params)
     gene_set = storages + connections + params
-
 
     def __init__(self, start_year,
                  end_year,
@@ -88,31 +92,6 @@ class LumpedCMFGenerator:
             "t_min": t_min,
             "t_max": t_max
         }
-        # Define gen set
-        # This is done so widespread to make it more readable and also allow
-        #  it later to check for what is in what.
-
-        # "first_layer" is excluded, as a model wihout any storage makes no
-        # sense
-        self.storages = ["snow", "canopy", "second_layer",
-                         "third_layer", "river"]
-        self.connections = ["tr_first_out", "tr_first_river", "tr_first_third",
-                            "tr_second_third", "tr_second_river_or_out",
-                            "tr_third_river_or_out", "river_out"]
-        self.snow_params = ["meltrate", "snow_melt_temp"]
-        self.canopy_params = ["lai", "canopy_closure"]
-        self.et_params = ["etv0", "fetv0"]
-        self.first_layer_params = ["beta_first_out", "beta_first_river",
-                                   "beta_first_second"]
-        self.second_layer_params = ["beta_second_river", "beta_second_third"]
-        self.third_layer_params = ["beta_third_river"]
-        self.river_params = ["beta_river_out"]
-        self.params = (self.snow_params + self.canopy_params +
-                       self.et_params + self. first_layer_params +
-                       self.second_layer_params + self.third_layer_params +
-                       self.river_params)
-        self.gene_set = self.storages + self.connections + self.params
-
         # Arguments for genetics behaviour
         self.max_age = max_age
         self.pool_size = pool_size
@@ -147,14 +126,19 @@ class LumpedCMFGenerator:
             return crossover(parent, donor, fn_get_fitness)
 
         start_time = datetime.datetime.now()
+
+        # Give all definitions to the get_best function of genetic to start
+        # the whole process of evolutionary selection
         best = genetic.get_best(fn_get_fitness, None, self.optimal_fitness,
                                 None, fn_display, fn_mutate, fn_create,
                                 max_age=self.max_age,
                                 pool_size=self.pool_size,
                                 crossover=fn_crossover)
+        # Run the process until the desired fitness value is reached.
         while not self.optimal_fitness > best.fitness:
             pass
 
+        # Write the best model to file.
         write_best_model(best)
 
 
