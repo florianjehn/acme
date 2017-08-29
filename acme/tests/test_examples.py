@@ -9,3 +9,7 @@ import acme.examples as examples
 class examples_tests(unittest.TestCase):
     def test(self):
         pass
+
+
+if __name__ == '__main__':
+    unittest.main()

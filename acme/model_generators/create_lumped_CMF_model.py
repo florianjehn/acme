@@ -238,7 +238,7 @@ def crossover(first_parent, second_parent):
     return child_genes
 
 
-def create(gene_set):
+def create():
     """
     Creates a genotype after given rules.
     
@@ -247,8 +247,32 @@ def create(gene_set):
     :param gene_set: all possible genes for a model
     :return: a genotype of a model
     """
-    #
+    threshold = 1/3
+    genes = []
+    # Snow
+    if random.random < threshold:
+        genes.append("snow")
+    if random.random < threshold:
+        genes.append("meltrate")
+    if random.random < threshold:
+        genes.append("snow_melt_temp")
 
+
+
+
+    # Canopy
+
+
+    # Layers
+
+
+    # Connections first layer
+
+
+    # Connections
+
+
+    # River
 
 
     pass

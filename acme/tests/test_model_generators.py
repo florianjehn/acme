@@ -196,3 +196,8 @@ def load_data(discharge_file, temperature_file, precipitation_file, area_catchme
             temperature_max, discharge
     else:
         pass
+
+
+
+if __name__ == '__main__':
+    unittest.main()
