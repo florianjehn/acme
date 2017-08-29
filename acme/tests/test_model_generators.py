@@ -136,6 +136,10 @@ class GeneratorsTests(unittest.TestCase):
         genotype.
         :return: None
         """
+        first_parent = ["snow", "second_layer", "canopy"]
+        second_parent = ["snow", "canopy", "third_layer", "second_layer"]
+        child = generator.crossover(first_parent, second_parent)
+        self.assertTrue(len(child) == len(set(child)))
 
     def test_create(self):
         pass

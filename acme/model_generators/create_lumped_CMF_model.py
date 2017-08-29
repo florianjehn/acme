@@ -224,8 +224,8 @@ def crossover(first_parent, second_parent):
     :return: a new genotype (list)
     """
     # Select two random points in the length of the parent and donor genome
-    index_first_parent = random.randint(len(first_parent))
-    index_second_parent = random.randint(len(second_parent))
+    index_first_parent = random.randint(0, len(first_parent))
+    index_second_parent = random.randint(0, len(second_parent))
     # Take all the genes from before the point from parent and all the genes
     # from behind the point from behind the point
     part_first_parent = first_parent[:index_first_parent]
