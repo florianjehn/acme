@@ -8,8 +8,13 @@ from acme.model_generators import create_lumped_CMF_model as generator
 import acme.genetics as genetics
 import datetime
 import copy
-import cmf
 import math
+import os
+
+# Only import cmf if the test is run on windows, so Travis does not try to
+# import a non existing thing
+if os.name == "nt":
+    import cmf
 
 
 class GeneratorsTests(unittest.TestCase):
@@ -23,29 +28,33 @@ class GeneratorsTests(unittest.TestCase):
                 "beta_third_river", "beta_river_out"]
 
     def test_solve(self):
-        area_catchment = 2976.41
-        discharge_file = "GrebenauQTagMittel__1979_1990.txt"
-        temperature_file = "Temp_max_min_avg_1979_1988.txt"
-        precipitation_file = "Prec_Grebenau_1979_1988.txt"
-        P, T, Tmin, Tmax, Q = load_data(discharge_file, temperature_file,
-                                        precipitation_file, area_catchment)
+        # Only run when not on travis
+        if os.name == "nt":
+            area_catchment = 2976.41
+            discharge_file = "GrebenauQTagMittel__1979_1990.txt"
+            temperature_file = "Temp_max_min_avg_1979_1988.txt"
+            precipitation_file = "Prec_Grebenau_1979_1988.txt"
+            P, T, Tmin, Tmax, Q = load_data(discharge_file, temperature_file,
+                                            precipitation_file, area_catchment)
 
-        lumped_model_generator = generator.LumpedCMFGenerator(
-            1980,
-            1982,
-            1,
-            "nashsutcliffe",
-            0.5,
-            "Uniform",
-            "lhs",
-            "Hargreave",
-            P,
-            Q,
-            T,
-            Tmin,
-            Tmax,
-            )
-        lumped_model_generator.solve()
+            lumped_model_generator = generator.LumpedCMFGenerator(
+                1980,
+                1982,
+                1,
+                "nashsutcliffe",
+                0.5,
+                "Uniform",
+                "lhs",
+                "Hargreave",
+                P,
+                Q,
+                T,
+                Tmin,
+                Tmax,
+                )
+            lumped_model_generator.solve()
+        else:
+            pass
 
     def test_get_fitness(self):
         pass
@@ -153,31 +162,37 @@ def load_data(discharge_file, temperature_file, precipitation_file, area_catchme
     Loads climata and discharge data from the corresponding files
     discharge_file, temperature_file and precipitation_file
     """
-    # Fixed model starting point
-    begin = datetime.datetime(1979, 1, 1)
-    step = datetime.timedelta(days=1)
-    # empty time series
-    precipitation = cmf.timeseries(begin, step)
-    with open(precipitation_file) as precipitation_file_file:
-        precipitation.extend(float(precipitation_str) for precipitation_str in
-                             precipitation_file_file)
-    discharge = cmf.timeseries(begin, step)
-    with open(discharge_file) as discharge_file_file:
-        discharge.extend(float(discharge_str) for discharge_str in
-                         discharge_file_file)
-    # Convert m3/s to mm/day
-    discharge *= 86400 * 1e3 / (area_catchment * 1e6)
-    temperature_avg = cmf.timeseries(begin, step)
-    temperature_min = cmf.timeseries(begin, step)
-    temperature_max = cmf.timeseries(begin, step)
+    # Only run when not on Travis
+    if os.name == "nt":
+        # Fixed model starting point
+        begin = datetime.datetime(1979, 1, 1)
+        step = datetime.timedelta(days=1)
+        # empty time series
+        precipitation = cmf.timeseries(begin, step)
+        with open(precipitation_file) as precipitation_file_file:
+            precipitation.extend(float(precipitation_str) for
+                                 precipitation_str in
+                                 precipitation_file_file)
+        discharge = cmf.timeseries(begin, step)
+        with open(discharge_file) as discharge_file_file:
+            discharge.extend(float(discharge_str) for discharge_str in
+                             discharge_file_file)
+        # Convert m3/s to mm/day
+        discharge *= 86400 * 1e3 / (area_catchment * 1e6)
+        temperature_avg = cmf.timeseries(begin, step)
+        temperature_min = cmf.timeseries(begin, step)
+        temperature_max = cmf.timeseries(begin, step)
 
-    # Go through all lines in the file
-    with open(temperature_file) as temperature_file_file:
-        for line in temperature_file_file:
-            columns = line.split('\t')
-            if len(columns) == 3:
-                temperature_max.add(float(columns[0]))
-                temperature_min.add(float(columns[1]))
-                temperature_avg.add(float(columns[2]))
+        # Go through all lines in the file
+        with open(temperature_file) as temperature_file_file:
+            for line in temperature_file_file:
+                columns = line.split('\t')
+                if len(columns) == 3:
+                    temperature_max.add(float(columns[0]))
+                    temperature_min.add(float(columns[1]))
+                    temperature_avg.add(float(columns[2]))
 
-    return precipitation, temperature_avg, temperature_min, temperature_max, discharge
+        return precipitation, temperature_avg, temperature_min,\
+            temperature_max, discharge
+    else:
+        pass
