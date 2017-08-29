@@ -180,10 +180,12 @@ def mutate(genes, gene_set):
     mutation_type = random.choice(["add", "del", "swap"])
     max_changes = 3
     if mutation_type == "add":
-        for _ in random.randint(1, max_changes):
+        for _ in range(random.randint(1, max_changes)):
             # If the genes already contains all possible genes,
-            # skip the process
+            # delete one gene and stop iteration
             if set(genes) == set(gene_set):
+                random.shuffle(genes)
+                genes.pop()
                 break
             while True:
                 new_gene = random.choice(gene_set)
@@ -193,13 +195,18 @@ def mutate(genes, gene_set):
                     break
 
     elif mutation_type == "del":
-        for _ in random.randint(1, max_changes):
+        for _ in range(random.randint(1, max_changes)):
+            # If the list is empty add an item and stop iteration
+            if len(genes) == 0:
+                new_gene = random.choice(gene_set)
+                genes.append(new_gene)
+                break
             # Pick a random genes
-            genes = random.shuffle(genes)
+            random.shuffle(genes)
             genes.pop()
 
     elif mutation_type == "swap":
-        for _ in random.randint(1, max_changes):
+        for _ in range(random.randint(1, max_changes)):
             # Make a copy of the parent genes
             initial_genes = genes[:]
             # create a index for a random place in the parent genome

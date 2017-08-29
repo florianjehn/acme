@@ -84,28 +84,28 @@ class GeneratorsTests(unittest.TestCase):
         count_add = 0
         count_del = 0
         count_swap = 0
-        reputations = 1000
-        for i in range(reputations):
-            genes_copy = copy.deepcopy(genes)
-            genes_copy = generator.mutate(genes_copy, self.gene_set,
-                                          generator.get_fitness)
-            if len(genes_copy) > len_before + 1:
+        repetitions = 10000
+        fraction = repetitions / 3
+        for i in range(repetitions):
+            genes_copy = genes[:]
+            generator.mutate(genes_copy, self.gene_set)
+            if len(genes_copy) > len_before:
                 count_add += 1
-            elif len(genes_copy) < len_before - 1:
+            elif len(genes_copy) < len_before:
                 count_del += 1
             elif len(genes_copy) == len_before:
                 count_swap += 1
         print("Added: {}\tDeleted:{}\tSwapped:{}\n\n".format(count_add,
                                                              count_del,
                                                              count_swap))
-        self.assertTrue(math.isclose(count_add, len_before,
-                                     abs_tol=reputations * 0.05)
+        self.assertTrue(math.isclose(count_add, fraction,
+                                     abs_tol=repetitions * 0.05)
                         and
-                        math.isclose(count_del, len_before,
-                                     abs_tol=reputations * 0.05)
+                        math.isclose(count_del, fraction,
+                                     abs_tol=repetitions * 0.05)
                         and
-                        math.isclose(count_swap, len_before,
-                                     abs_tol=reputations * 0.05)
+                        math.isclose(count_swap, fraction,
+                                     abs_tol=repetitions * 0.05)
                         )
 
     def test_check_for_connection_outlet_present(self):
@@ -196,8 +196,6 @@ def load_data(discharge_file, temperature_file, precipitation_file, area_catchme
             temperature_max, discharge
     else:
         pass
-
-
 
 if __name__ == '__main__':
     unittest.main()

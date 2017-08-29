@@ -14,3 +14,4 @@ script:
   - python acme/tests/test_genetics.py
   - python acme/tests/test_model_generators.py
   - python acme/tests/test_visualization.py
+  - python acme/tests/test_examples.py
