@@ -8,7 +8,10 @@ models which are generated during the evolutionary process. Also the class is
 the interface to spotpy.
 """
 import datetime
-import cmf
+import os
+# Exclude CMF to allow Travis testing
+if os.name == "nt":
+    import cmf
 import spotpy
 import os
 import numpy as np
