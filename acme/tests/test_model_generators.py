@@ -18,14 +18,36 @@ if os.name == "nt":
 
 
 class GeneratorsTests(unittest.TestCase):
-    gene_set = ["snow", "canopy", "second_layer",
-                "third_layer", "river", "first_out", "first_river",
-                "first_third", "second_third", "second_river",
-                "third_river", "meltrate", "snow_melt_temp", "lai",
-                "canopy_closure", "etv0", "fetv0", "beta_first_out",
-                "beta_first_river", "beta_first_second",
-                "beta_second_river", "beta_second_third",
-                "beta_third_river", "beta_river_out"]
+    gene_set = ["snow",
+                "canopy",
+                "second_layer",
+                "third_layer",
+                "river",
+
+                "tr_first_out",
+                "tr_first_river",
+                "tr_first_third",
+                "tr_second_third",
+                "tr_second_river",
+                "tr_third_river",
+
+                "meltrate",
+                "snow_melt_temp",
+
+                "lai",
+                "canopy_closure",
+
+                "beta_first_out",
+                "beta_first_river",
+                "beta_first_second",
+                "beta_second_river",
+                "beta_second_third",
+                "beta_third_river",
+                "beta_river_out",
+
+                "v0_first_out",
+                "v0_first_river",
+                "v0_first_second"]
 
     def test_solve(self):
         # Only run when not on travis
@@ -84,7 +106,7 @@ class GeneratorsTests(unittest.TestCase):
         count_add = 0
         count_del = 0
         count_swap = 0
-        repetitions = 10000
+        repetitions = 1000
         fraction = repetitions / 3
         for i in range(repetitions):
             genes_copy = genes[:]

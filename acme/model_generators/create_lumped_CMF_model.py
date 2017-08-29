@@ -30,14 +30,17 @@ class LumpedCMFGenerator:
                    "tr_third_river_or_out", "river_out"]
     snow_params = ["meltrate", "snow_melt_temp"]
     canopy_params = ["lai", "canopy_closure"]
-    et_params = ["etv0", "fetv0"]
+    # ET params excluded as a ETact that is always ETpot makes no sense
+    # et_params = ["etv0", "fetv0"]
     first_layer_params = ["beta_first_out", "beta_first_river",
-                          "beta_first_second"]
+                          "beta_first_second", "v0_first_out",
+                          "v0_first_river", "v0_first_second"]
     second_layer_params = ["beta_second_river", "beta_second_third"]
     third_layer_params = ["beta_third_river"]
     river_params = ["beta_river_out"]
     params = (snow_params + canopy_params +
-              et_params + first_layer_params +
+              # et_params +
+              first_layer_params +
               second_layer_params + third_layer_params +
               river_params)
     gene_set = storages + connections + params
@@ -111,7 +114,7 @@ class LumpedCMFGenerator:
         # Helper functions used as interface to genetic.
 
         def fn_create():
-            return create(gene_set)
+            return create()
 
         def fn_display(candidate):
             display(candidate, start_time)
@@ -123,7 +126,7 @@ class LumpedCMFGenerator:
             mutate(genes, fn_get_fitness)
 
         def fn_crossover(parent, donor):
-            return crossover(parent, donor, fn_get_fitness)
+            return crossover(parent, donor)
 
         start_time = datetime.datetime.now()
 
@@ -164,7 +167,7 @@ def display(candidate, start_time):
     :return: None
     """
     time_diff = datetime.datetime.now() - start_time
-    print("Genes: {}\t\nFit: {}\tStrategy: {}\tTime: {}".format(
+    print("Genes: {}\t\nFitness: {}\tStrategy: {}\tTime: {}".format(
         " ".join(map(str, candidate.genes)),
         candidate.fitness, candidate.Strategy.name, time_diff))
 
@@ -256,33 +259,79 @@ def create():
     """
     threshold = 1/3
     genes = []
+
     # Snow
-    if random.random < threshold:
+    if random.random() < threshold:
         genes.append("snow")
-    if random.random < threshold:
-        genes.append("meltrate")
-    if random.random < threshold:
-        genes.append("snow_melt_temp")
-
-
-
+        # Only add the snow parameter genes if there is a snow storage
+        if random.random() < threshold:
+            genes.append("meltrate")
+        if random.random() < threshold:
+            genes.append("snow_melt_temp")
 
     # Canopy
-
+    if random.random() < threshold:
+        genes.append("canopy")
+        if random.random() < threshold:
+            genes.append("canopy_closure")
+        if random.random() < threshold:
+            genes.append("lai")
 
     # Layers
+    if random.random() < threshold:
+        genes.append("second_layer")
+        if random.random() < threshold:
+            genes.append("third_layer")
 
+    if random.random() < threshold:
+        genes.append("river")
 
     # Connections first layer
+    if random.random() < threshold:
+        genes.append("tr_first_second")
+        if random.random() < threshold:
+            genes.append("beta_first_second")
+        if random.random() < threshold:
+            genes.append("v0_first_second")
 
+    if random.random() < threshold:
+        genes.append("tr_first_river")
+        if random.random() < threshold:
+            genes.append("beta_first_river")
+        if random.random() < threshold:
+            genes.append("v0_first_river")
 
-    # Connections
+    if random.random() < threshold:
+        genes.append("tr_first_out")
+        if random.random() < threshold:
+            genes.append("beta_first_out")
+        if random.random() < threshold:
+            genes.append("v0_first_out")
 
+    # Connections second layer
+    if "second_layer" in genes:
+        # loop through until second_layer has a connection so somewhere
+        while "tr_second_third" not in genes or "tr_second_river" not in genes:
+            if random.random() < threshold:
+                genes.append("tr_second_third")
+                if random.random() < threshold:
+                    genes.append("beta_second_third")
+            if random.random() < threshold:
+                genes.append("tr_second_river")
+                if random.random() < threshold:
+                    genes.append("beta_second_river")
+
+    # Connections third layer
+    if "third_layer" in genes:
+        # always add a connection, otherwise third_layer would be a dead end
+        genes.append("tr_third_river")
+        if random.random() < threshold:
+            genes.append("beta_third_river")
 
     # River
-
-
-    pass
+    if "river" in genes:
+        if random.random() < threshold:
+            genes.append("beta_river_out")
 
 
 def write_best_model(genes):
