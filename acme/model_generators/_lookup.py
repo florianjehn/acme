@@ -6,7 +6,9 @@ Created on Aug 16 12:52 2017
 This delivers back the functions specified by user.
 """
 import spotpy
-import cmf
+import os
+if os.name == "nt":
+    import cmf
 
 
 def get_obj_func(obj_func):
