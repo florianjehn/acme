@@ -332,6 +332,7 @@ def create():
     if "river" in genes:
         if random.random() < threshold:
             genes.append("beta_river_out")
+    return genes
 
 
 def write_best_model(genes):

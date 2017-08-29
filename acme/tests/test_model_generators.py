@@ -94,9 +94,9 @@ class GeneratorsTests(unittest.TestCase):
 
     def test_mutation(self):
         """
-        Calls the mutation function for 1000 times. After that ~ 333 genotypes
-        should have one gene more and ~ 333 genotypes should have gen less
-        and ~ 333 genotypes should have one gene replaced by another one.
+        Calls the mutation function for 1000 times. After that ~ 3333 genotypes
+        should have one gene more and ~ 3333 genotypes should have gen less
+        and ~ 3333 genotypes should have one gene replaced by another one.
         :return:
         """
         genes = ["snow", "second_layer",
@@ -106,7 +106,7 @@ class GeneratorsTests(unittest.TestCase):
         count_add = 0
         count_del = 0
         count_swap = 0
-        repetitions = 1000
+        repetitions = 10000
         fraction = repetitions / 3
         for i in range(repetitions):
             genes_copy = genes[:]
@@ -172,8 +172,15 @@ class GeneratorsTests(unittest.TestCase):
         child = generator.crossover(first_parent, second_parent)
         self.assertTrue(len(child) == len(set(child)))
 
-    def test_create(self):
-        pass
+    def test_create_is_non_empty_list(self):
+        """
+        Tests if the create method returns a non empty list of genes.
+
+        :return: None
+        """
+        genes = generator.create()
+        self.assertTrue(isinstance(genes, list) and len(genes) > 0)
+
 
     def test_write_best_model(self):
         pass
