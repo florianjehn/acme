@@ -4,6 +4,11 @@ python:
   - "3.5"
   - "3.6"
 
+# Configure where all the mails should be send
+notifications:
+  email:
+    - florian.u.jehn@umwelt.uni-giessen.de
+
   # command to install dependencies
 install:
   - pip install spotpy
