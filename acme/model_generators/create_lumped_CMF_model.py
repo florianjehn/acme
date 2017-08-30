@@ -45,6 +45,10 @@ class LumpedCMFGenerator:
               river_params)
     gene_set = storages + connections + params
 
+    # List to save all models that have been tested so far. The key is
+    # the genes in the model and the value the best objective function
+    models_so_far = {}
+
     def __init__(self, start_year,
                  end_year,
                  validation_time_span,
@@ -98,7 +102,8 @@ class LumpedCMFGenerator:
         # Arguments for genetics behaviour
         self.max_age = max_age
         self.pool_size = pool_size
-        
+
+
     def solve(self):
         """
         Starts the process of model selection.
@@ -150,12 +155,23 @@ def get_fitness(genes, data, obj_func):
     Calculates the fitness of a given genotype.
     :return:
     """
-    ### First run the model with a row of default parameters for a few days and then cycle through it recurevily. Then check if a outlet is inside the model. If not assign it a fitness value of  a negative big number.
-    ### If the model has a outlet let it then run normally.
-    ### One could even make it this way, that this functions here just gets bkac the whole run table of the model and filters out the highest value for "like1" and returns it.
+    ### Compare if the genes the function gets, have already been calculated
+    #  as a model
+    ### If so, simply return the fitness value of the already calculated model
+
+    ### If not call the template with the genes
+
+    ### The template runs until the predefined convergence value of dream is
+    #  reached.
+
+    ### Then form the sampler the best value of the objective function is
+    # extraced with sampler.bestlike
+
+    ### Speichern des Genomes zusammen mit dem like im gesamt dict
+
+    ### Rückgabe des Fitnesswertes
 
 
-    #model = template.LumpedModelCMF()
     return 1
 
 
