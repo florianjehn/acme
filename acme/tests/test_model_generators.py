@@ -190,7 +190,7 @@ class GeneratorsTests(unittest.TestCase):
         print("not_empty = {}".format(not_empty))
         self.assertTrue(isinstance(genes, list) and not_empty > 900)
 
-    def test_write_best_model(self):
+    def test_write_all_model(self):
         pass
 
 

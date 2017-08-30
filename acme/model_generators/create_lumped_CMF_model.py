@@ -376,7 +376,16 @@ def write_all_model():
 
     :return: None
     """
-    pass
+    # Open the output file
+    outfile = open('acme_results".csv', 'w')
+
+    # Make the header
+    header = "Like" + "Genes"
+    outfile.write(header)
+
+    # Write the entries
+    for genes, like in LumpedCMFGenerator.models_so_far:
+        outfile.write(like, genes)
 
 
 def check_for_connection(genes):
