@@ -66,7 +66,7 @@ class GeneratorsTests(unittest.TestCase):
         #         "nashsutcliffe",
         #         0.5,
         #         "Uniform",
-        #         "lhs",
+        #         "dream",
         #         "Hargreave",
         #         P,
         #         Q,

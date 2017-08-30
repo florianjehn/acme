@@ -15,6 +15,7 @@ import acme.model_generators._lookup as lookup
 import acme.genetics.genetic as genetic
 import datetime
 import random
+import os
 
 
 class LumpedCMFGenerator:
@@ -113,8 +114,8 @@ class LumpedCMFGenerator:
         """
         # Make the needed variables available for the helper functions.
         data = self.data
-        gene_set = self.gene_set
         obj_func = self.obj_func
+        algorithm = self.algorithm
 
         # Helper functions used as interface to genetic.
 
@@ -125,7 +126,7 @@ class LumpedCMFGenerator:
             display(candidate, start_time)
 
         def fn_get_fitness(genes):
-            return get_fitness(genes, data, obj_func)
+            return get_fitness(genes, data, obj_func, algorithm)
 
         def fn_mutate(genes):
             mutate(genes, fn_get_fitness)
@@ -150,29 +151,47 @@ class LumpedCMFGenerator:
         write_best_model(best)
 
 
-def get_fitness(genes, data, obj_func):
+def get_fitness(genes, data, obj_func, algorithm):
     """
     Calculates the fitness of a given genotype.
+
+    :param genes: genotype that is to be tested for its fitness
+    :param data: the weather data in the form of a dict of lists
+    :param obj_func: the objective function that is to be used.
+    :param algorithm: The sampling algorithm form Spotpy. For now the use of
+                      dream is assumed.
     :return:
     """
-    ### Compare if the genes the function gets, have already been calculated
+    # Compare if the genes the function gets, have already been calculated
     #  as a model
-    ### If so, simply return the fitness value of the already calculated model
+    for old_model in LumpedCMFGenerator.models_so_far.keys():
+        # Turn model in list version
+        old_model_genes = old_model.split()
+        # If so, simply return the fitness value of the old model
+        if set(old_model_genes) == set(genes):
+            return LumpedCMFGenerator.models_so_far[old_model]
 
-    ### If not call the template with the genes
+    # If not call the template and run the model
+    current_model = template.LumpedModelCMF(genes, data, obj_func)
 
-    ### The template runs until the predefined convergence value of dream is
-    #  reached.
+    # Find out if the model should run parallel (for supercomputer)
+    parallel = 'mpi' if 'OMPI_COMM_WORLD_SIZE' in os.environ else 'seq'
 
-    ### Then form the sampler the best value of the objective function is
-    # extraced with sampler.bestlike
+    sampler = algorithm(current_model, parallel=parallel, dbformat="noData")
 
-    ### Speichern des Genomes zusammen mit dem like im gesamt dict
+    # The template runs until the predefined convergence value of dream is
+    #  reached (or the maximal value for repetions is reached).
+    sampler.sample(500, convergence_limit=1.6)
 
-    ### Rückgabe des Fitnesswertes
+    # Extract the best value from the model
+    best_like = sampler.bestlike
 
+    # Save the current model in the all models list
+    model_key = " ".join(genes)
+    LumpedCMFGenerator.models_so_far[model_key] = best_like
 
-    return 1
+    # Return best fitness value of all runs
+    return best_like
 
 
 def display(candidate, start_time):
@@ -351,12 +370,11 @@ def create():
     return genes
 
 
-def write_best_model(genes):
+def write_all_model():
     """
-    Writes the best model to a file.
+    Writes all the models to a file.
 
-    :param genes:
-    :return:
+    :return: None
     """
     pass
 
