@@ -180,6 +180,8 @@ def get_fitness(genes, data, obj_func, algorithm):
                       dream is assumed.
     :return: Highest fitness value
     """
+    # Check if the model to be generated is able to connect to an output
+    check_for_connection(genes)
     # Compare if the genes the function gets, have already been calculated
     #  as a model
     for old_model in LumpedCMFGenerator.models_so_far.keys():
@@ -275,7 +277,6 @@ def mutate(genes, gene_set):
                                     else
                                     new_gene)
     # Check it outlet is still present
-    check_for_connection(genes)
     return
 
 
@@ -300,7 +301,6 @@ def crossover(first_parent, second_parent):
     # then turn it back to a list and return it
     child_genes = list(set(child_genes))
     # Check if outlet is still present
-    check_for_connection(child_genes)
     return child_genes
 
 
