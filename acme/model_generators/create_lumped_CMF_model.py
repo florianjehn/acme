@@ -143,6 +143,15 @@ class LumpedCMFGenerator:
                                 max_age=self.max_age,
                                 pool_size=self.pool_size,
                                 crossover=fn_crossover)
+
+        ### At this place it might be handy to nest the while loop into a
+        # for loop. The for loop starts with a value for the objective
+        # function below the desired one and the gives the while loop some
+        # time to find best model. If this is accomplished a new run is
+        # started with a bit higher value of the objective function. This is
+        #  repeated until the algorithm is no longer able to find a model
+        # which satisfies the condition.
+
         # Run the process until the desired fitness value is reached.
         while not self.optimal_fitness > best.fitness:
             pass
