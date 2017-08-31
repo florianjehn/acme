@@ -52,7 +52,31 @@ class GeneratorsTests(unittest.TestCase):
         pass
 
     def test_get_fitness(self):
-        pass
+        """
+        Calls the get_fitness function with a mockup model setup, which contains all possible genes. To test if it runs correctly.
+
+        :return: None
+        """
+        genes = generator.LumpedCMFGenerator.gene_set
+        precipitation, temperature_avg, temperature_min, \
+        temperature_max, discharge = load_data(
+            "GrebenauQTagMittel__1979_1990.txt",
+            "Temp_max_min_avg_1979_1988.txt",
+            "Prec_Grebenau_1979_1988.txt",
+            2976.41
+        )
+        data = data = {
+            "prec": precipitation,
+            "discharge": discharge,
+            "t_mean": temperature_avg,
+            "t_min": temperature_min,
+            "t_max": temperature_max
+        }
+        obj_func = "nashsutcliffe"
+        algorithm = "dream"
+        fitness = generator.get_fitness(genes, data, obj_func, algorithm)
+        self.assertTrue(fitness > 0)
+
 
     def test_display(self):
         """
