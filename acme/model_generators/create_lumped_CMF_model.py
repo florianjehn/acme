@@ -26,9 +26,9 @@ class LumpedCMFGenerator:
     # The possible parameters are defined for the class as a whole as they
     # are equal for all instances and are easier to access this way.
     storages = ["snow", "canopy", "second_layer", "third_layer", "river"]
-    connections = ["tr_first_out", "tr_first_river", "tr_first_third",
-                   "tr_second_third", "tr_second_river_or_out",
-                   "tr_third_river_or_out", "river_out"]
+    connections = ["tr_first_out", "tr_first_river", "tr_first_second",
+                   "tr_second_third", "tr_second_river",
+                   "tr_third_river"]
     snow_params = ["meltrate", "snow_melt_temp"]
     canopy_params = ["lai", "canopy_closure"]
     # ET params excluded as a ETact that is always ETpot makes no sense

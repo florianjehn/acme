@@ -172,8 +172,10 @@ class GeneratorsTests(unittest.TestCase):
         if set(genes) == set(self.gene_set):
             self.assertTrue(True)
         else:
-            print("The following genes were not in both genes and "
-                  "gene_set: {}".format(set(genes)^set(self.gene_set)))
+            print("The following genes were in genes and not in "
+                  "gene_set: {}".format(set(genes) - set(self.gene_set)))
+            print("The following genes were in gene_set, but not in genes: "
+                  "{}".format(set(self.gene_set) - set(genes)))
             self.assertTrue(False)
 
 
