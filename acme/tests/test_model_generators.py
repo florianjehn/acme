@@ -18,36 +18,7 @@ if os.name == "nt":
 
 
 class GeneratorsTests(unittest.TestCase):
-    gene_set = ["snow",
-                "canopy",
-                "second_layer",
-                "third_layer",
-                "river",
-
-                "tr_first_out",
-                "tr_first_river",
-                "tr_first_third",
-                "tr_second_third",
-                "tr_second_river",
-                "tr_third_river",
-
-                "meltrate",
-                "snow_melt_temp",
-
-                "lai",
-                "canopy_closure",
-
-                "beta_first_out",
-                "beta_first_river",
-                "beta_first_second",
-                "beta_second_river",
-                "beta_second_third",
-                "beta_third_river",
-                "beta_river_out",
-
-                "v0_first_out",
-                "v0_first_river",
-                "v0_first_second"]
+    gene_set = generator.LumpedCMFGenerator.gene_set
 
     def test_solve(self):
         # # Only run when not on travis
@@ -189,6 +160,22 @@ class GeneratorsTests(unittest.TestCase):
                 not_empty += 1
         print("not_empty = {}".format(not_empty))
         self.assertTrue(isinstance(genes, list) and not_empty > 900)
+
+    def test_create_all_possible_genes_present(self):
+        """
+        Calls create() with the test variable, which triggers all control
+        flows to be true. Thus creating a model with all possible genes.
+        This should equal the gene_set
+        :return: None
+        """
+        genes = generator.create(test=True)
+        if set(genes) == set(self.gene_set):
+            self.assertTrue(True)
+        else:
+            print("The following genes were not in both genes and "
+                  "gene_set: {}".format(set(genes)^set(self.gene_set)))
+            self.assertTrue(False)
+
 
     def test_write_all_model(self):
         pass

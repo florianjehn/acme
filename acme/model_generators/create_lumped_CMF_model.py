@@ -5,7 +5,7 @@ Created on Aug 15 13:28 2017
 
 This file is used to start the construction of a predefined CMF model. The
 user only has to provide the forcing data and the kind of techniques (
-Distribution, objective function, etc.).
+distribution, objective function, etc.).
 
 The structure is created in such a way, that there is always at least one
 connection to the outlet.
@@ -56,7 +56,7 @@ class LumpedCMFGenerator:
 
                  obj_func,
                  optimal_fitness,
-                 Distribution,
+                 distribution,
                  algorithm,
                  et,
 
@@ -67,7 +67,9 @@ class LumpedCMFGenerator:
                  t_max,
 
                  max_age=50,
-                 pool_size=10
+                 pool_size=10,
+                 search_iterations = 1,
+                 obj_func_increment = 0.1
                  ):
         """
         Sets everything up, ready to be solved.
@@ -78,7 +80,7 @@ class LumpedCMFGenerator:
         used for calibration
         :param obj_func: the objective function that should be used (only
         the name is needed, all objective functions in spotpy are possible)
-        :param Distribution: The way the parameters will be distributed (
+        :param distribution: The way the parameters will be distributed (
         e.g. Weibull)
         :param et: Method for calculation of evapotranspiration
         """
@@ -89,7 +91,7 @@ class LumpedCMFGenerator:
         # Get the functions and classes the match the user specified inputs.
         self.obj_func = lookup.get_obj_func(obj_func)
         self.optimal_fitness = optimal_fitness
-        self.Distribution = lookup.get_distribution(Distribution)
+        self.distribution = lookup.get_distribution(distribution)
         self.algorithm = lookup.get_algorithm(algorithm)
         self.et = lookup.get_evapotranspiration(et)
         # Forcing data
@@ -103,7 +105,8 @@ class LumpedCMFGenerator:
         # Arguments for genetics behaviour
         self.max_age = max_age
         self.pool_size = pool_size
-
+        self.search_iterations = search_iterations
+        self.obj_func_increment = obj_func_increment
 
     def solve(self):
         """
@@ -152,12 +155,18 @@ class LumpedCMFGenerator:
         #  repeated until the algorithm is no longer able to find a model
         # which satisfies the condition.
 
-        # Run the process until the desired fitness value is reached.
-        while not self.optimal_fitness > best.fitness:
-            pass
+        # Sth like
+        if self.search_iterations > 1:
+            for iteration in range(self.search_iterations):
+                pass
+
+        else:
+            # Run the process until the desired fitness value is reached.
+            while not self.optimal_fitness > best.fitness:
+                pass
 
         # Write the best model to file.
-        write_best_model(best)
+        write_all_model()
 
 
 def get_fitness(genes, data, obj_func, algorithm):
@@ -169,7 +178,7 @@ def get_fitness(genes, data, obj_func, algorithm):
     :param obj_func: the objective function that is to be used.
     :param algorithm: The sampling algorithm form Spotpy. For now the use of
                       dream is assumed.
-    :return:
+    :return: Highest fitness value
     """
     # Compare if the genes the function gets, have already been calculated
     #  as a model
@@ -189,7 +198,7 @@ def get_fitness(genes, data, obj_func, algorithm):
     sampler = algorithm(current_model, parallel=parallel, dbformat="noData")
 
     # The template runs until the predefined convergence value of dream is
-    #  reached (or the maximal value for repetions is reached).
+    #  reached (or the maximal value for repetitions is reached).
     sampler.sample(500, convergence_limit=1.6)
 
     # Extract the best value from the model
@@ -221,7 +230,6 @@ def mutate(genes, gene_set):
     Mutates a genome
     :param genes: genes of a given individual
     :param gene_set: all possible genes.
-    :param fn_get_fitness:
     :return: None (the list is directly manipulated)
     """
     mutation_type = random.choice(["add", "del", "swap"])
@@ -296,89 +304,88 @@ def crossover(first_parent, second_parent):
     return child_genes
 
 
-def create():
+def create(test=False):
     """
     Creates a genotype after given rules.
     
     Allows creation in such a way, that a connection to the outlet is 
     guaranteed. 
-    :param gene_set: all possible genes for a model
     :return: a genotype of a model
     """
     threshold = 1/3
     genes = []
 
     # Snow
-    if random.random() < threshold:
+    if random.random() < threshold or test:
         genes.append("snow")
         # Only add the snow parameter genes if there is a snow storage
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("meltrate")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("snow_melt_temp")
 
     # Canopy
-    if random.random() < threshold:
+    if random.random() < threshold or test:
         genes.append("canopy")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("canopy_closure")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("lai")
 
     # Layers
-    if random.random() < threshold:
+    if random.random() < threshold or test:
         genes.append("second_layer")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("third_layer")
 
-    if random.random() < threshold:
+    if random.random() < threshold or test:
         genes.append("river")
 
     # Connections first layer
-    if random.random() < threshold:
+    if random.random() < threshold or test:
         genes.append("tr_first_second")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("beta_first_second")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("v0_first_second")
 
-    if random.random() < threshold:
+    if random.random() < threshold or test:
         genes.append("tr_first_river")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("beta_first_river")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("v0_first_river")
 
-    if random.random() < threshold:
+    if random.random() < threshold or test:
         genes.append("tr_first_out")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("beta_first_out")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("v0_first_out")
 
     # Connections second layer
     if "second_layer" in genes:
         # loop through until second_layer has a connection so somewhere
         while "tr_second_third" not in genes or "tr_second_river" not in genes:
-            if random.random() < threshold:
+            if random.random() < threshold or test:
                 genes.append("tr_second_third")
-                if random.random() < threshold:
+                if random.random() < threshold or test:
                     genes.append("beta_second_third")
-            if random.random() < threshold:
+            if random.random() < threshold or test:
                 genes.append("tr_second_river")
-                if random.random() < threshold:
+                if random.random() < threshold or test:
                     genes.append("beta_second_river")
 
     # Connections third layer
     if "third_layer" in genes:
         # always add a connection, otherwise third_layer would be a dead end
         genes.append("tr_third_river")
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("beta_third_river")
 
     # River
     if "river" in genes:
-        if random.random() < threshold:
+        if random.random() < threshold or test:
             genes.append("beta_river_out")
 
     # Check if a connection to the outlet exists
