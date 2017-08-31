@@ -257,6 +257,8 @@ def mutate(genes, gene_set):
                                     initial_genes[index]
                                     else
                                     new_gene)
+    # Check it outlet is still present
+    check_for_connection(genes)
     return
 
 
@@ -280,6 +282,8 @@ def crossover(first_parent, second_parent):
     # Create a set out of it to avoid duplicates
     # then turn it back to a list and return it
     child_genes = list(set(child_genes))
+    # Check if outlet is still present
+    check_for_connection(child_genes)
     return child_genes
 
 
@@ -367,6 +371,9 @@ def create():
     if "river" in genes:
         if random.random() < threshold:
             genes.append("beta_river_out")
+
+    # Check if a connection to the outlet exists
+    check_for_connection(genes)
     return genes
 
 
@@ -385,7 +392,7 @@ def write_all_model():
 
     # Write the entries
     for genes, like in LumpedCMFGenerator.models_so_far:
-        outfile.write(like, genes)
+        outfile.write([like, genes])
 
 
 def check_for_connection(genes):
@@ -393,7 +400,7 @@ def check_for_connection(genes):
     Determines if a there is a connection to the outlet and if not creates one.
 
     :param genes:
-    :return:
+    :return: None
     """
     to_outlet = False
     outgoing = []
