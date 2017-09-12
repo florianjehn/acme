@@ -50,9 +50,10 @@ class LumpedCMFGenerator:
     # the genes in the model and the value the best objective function
     models_so_far = {}
 
-    def __init__(self, start_year,
-                 end_year,
-                 validation_time_span,
+    def __init__(self, begin_calibration,
+                 end_calibration,
+                 begin_validation,
+                 end_validation,
 
                  obj_func,
                  optimal_fitness,
@@ -68,8 +69,8 @@ class LumpedCMFGenerator:
 
                  max_age=50,
                  pool_size=10,
-                 search_iterations = 1,
-                 obj_func_increment = 0.1
+                 search_iterations=1,
+                 obj_func_increment=0.1
                  ):
         """
         Sets everything up, ready to be solved.
@@ -85,15 +86,18 @@ class LumpedCMFGenerator:
         :param et: Method for calculation of evapotranspiration
         """
         # Calibration/Validation stuff
-        self.start_year = start_year
-        self.end_year = end_year
-        self.validation_time_span = validation_time_span
+        self.begin_calibration = begin_calibration
+        self.end_calibration = end_calibration
+        self.begin_validation = begin_validation
+        self.end_validation = end_validation
+
         # Get the functions and classes the match the user specified inputs.
         self.obj_func = lookup.get_obj_func(obj_func)
         self.optimal_fitness = optimal_fitness
         self.distribution = lookup.get_distribution(distribution)
         self.algorithm = lookup.get_algorithm(algorithm)
         self.et = lookup.get_evapotranspiration(et)
+
         # Forcing data
         self.data = {
             "prec": prec, 
@@ -119,6 +123,11 @@ class LumpedCMFGenerator:
         data = self.data
         obj_func = self.obj_func
         algorithm = self.algorithm
+        # Calibration/Validation stuff
+        begin_calibration = self.begin_calibration
+        end_calibration = self.end_calibration
+        begin_validation = self.begin_validation
+        end_validation = self.end_validation
 
         # Helper functions used as interface to genetic.
 
@@ -129,7 +138,9 @@ class LumpedCMFGenerator:
             display(candidate, start_time)
 
         def fn_get_fitness(genes):
-            return get_fitness(genes, data, obj_func, algorithm)
+            return get_fitness(genes, data, obj_func, algorithm,
+                               begin_calibration, end_calibration,
+                               begin_validation, end_validation)
 
         def fn_mutate(genes):
             mutate(genes, fn_get_fitness)
@@ -169,7 +180,9 @@ class LumpedCMFGenerator:
         write_all_model()
 
 
-def get_fitness(genes, data, obj_func, algorithm):
+def get_fitness(genes, data, obj_func, algorithm,
+                begin_calibration, end_calibration,
+                begin_validation, end_validation):
     """
     Calculates the fitness of a given genotype.
 
@@ -192,7 +205,9 @@ def get_fitness(genes, data, obj_func, algorithm):
             return LumpedCMFGenerator.models_so_far[old_model]
 
     # If not call the template and run the model
-    current_model = template.LumpedModelCMF(genes, data, obj_func)
+    current_model = template.LumpedModelCMF(genes, data, obj_func,
+                                            begin_calibration, end_calibration,
+                                            begin_validation, end_validation)
 
     # Find out if the model should run parallel (for supercomputer)
     parallel = 'mpi' if 'OMPI_COMM_WORLD_SIZE' in os.environ else 'seq'
@@ -400,7 +415,7 @@ def write_all_model():
     :return: None
     """
     # Open the output file
-    outfile = open('acme_results".csv', 'w')
+    outfile = open('acme_results.csv', 'w')
 
     # Make the header
     header = "Like" + "Genes"

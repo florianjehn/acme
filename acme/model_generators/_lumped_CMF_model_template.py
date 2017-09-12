@@ -7,6 +7,7 @@ This template is called from the generator to be used as basis for all
 models which are generated during the evolutionary process. Also the class is
 the interface to spotpy.
 """
+
 import datetime
 import os
 # Exclude CMF to allow Travis testing
@@ -19,16 +20,19 @@ import acme.model_generators._lookup as _lookup
 
 
 class LumpedModelCMF:
-    def __init__(self, genes, data, obj_func=None):
+    def __init__(self, genes, data, obj_func,
+                 begin_calibration, end_calibration,
+                 begin_validation, end_validation):
         """
 
         :param genotype:
         """
-        if obj_func is None:
-            obj_func = _lookup.get_obj_func("nashsutcliffe")
-        self.genotype_to_structure(genotype)
+        self.obj_func = obj_func
+        self.genes = genes
+        self.data = data
         self.objective_function = obj_func
-        self.area_catchment = area_catchment
+        self.begin = begin
+        self.end = end
 
         def basic_layout():
             # include first_layer here, so the model has at least one storage
@@ -100,8 +104,7 @@ class LumpedModelCMF:
         return rainstation
     # TODO: Anpassen an ACME
 
-
-    def runmodel(self):
+    def run_model(self):
         """
         Starts the model. Used by spotpy
         """
@@ -127,14 +130,15 @@ class LumpedModelCMF:
                             self.begin:self.end + datetime.timedelta(
                                 days=1)])*np.nan
 
-    def test_run(self):
+    def simulation(self, vector):
         """
-        Stars the model one time to determine if there is a connection to
-        the outlet, by recursively cycling through all nodes.
-        :return:
+        SpotPy expects a method simulation. This methods calls setparameters
+        and runmodels, so SpotPy is satisfied.
         """
-        pass
-
+        paramdict = dict((pp.name, v) for pp, v in zip(self.params, vector))
+        self.setparameters(**paramdict)
+        sim_discharge = self.run_model()
+        return np.array(sim_discharge)
 
     def evaluation(self):
         """
