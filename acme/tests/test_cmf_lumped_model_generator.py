@@ -206,19 +206,22 @@ class GeneratorsTests(unittest.TestCase):
         model template creates the param list correctly.
         """
         genes = generator.LumpedCMFGenerator.gene_set
-        params = template.LumpedModelCMF.create_params_from_genes(genes)
+        params = (template.LumpedModelCMF.
+                  create_params_from_genes(genes, lookup.get_distribution(
+                                                                 "Uniform")))
 
         params_names = []
         for param in params:
-            params_names.append(param.name)
-                        # Must be equally long
+            if param.name != "ETV1" and param.name != "fETV0":
+                params_names.append(param.name)
+
         self.assertTrue(len(params) == len(genes)
                         and
                         # Check if the param is created as an
                         # distribution object
                         params[0].optguess is not None
                         and
-                        # Both lists should be the same if all worked well
+                        # Both sets should be the same if all worked well
                         set(genes) == set(params_names))
 
     def test_create_all_possible_genes_present(self):

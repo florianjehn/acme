@@ -46,7 +46,8 @@ class LumpedModelCMF:
         self.end_validation = end_validation
 
         # Create params list
-        self.params = self.create_params_from_genes(self.genes)
+        self.params = self.create_params_from_genes(self.genes,
+                                                    self.distribution)
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -101,19 +102,57 @@ class LumpedModelCMF:
         if "river" in self.genes:
             c.add_storage("river", "r")
 
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-        # Now create all parameters which are needed to for the gene set up
 
     @staticmethod
-    def create_params_from_genes(genes):
+    def create_params_from_genes(genes, distribution):
         """
         Creates the param list, which is needed for SPOTPY. It is static
         so it can be tested without creating an template instance.
         :return: params list
         """
         params = []
+        # ET Params always included
+        # ETV1 = Under this volume the potential ET is reduced by the factor
+        # fETV0
+        params.append(distribution("ETV1", 0., 200.))
+        params.append(distribution("fETV0", 0., 0.5))
 
+        # Add transition times
+        if "tr_first_out" in genes:
+            params.append(distribution("tr_first_out", 0., 300.))
+
+        if "tr_first_river" in genes and "river" in genes:
+            params.append(distribution("tr_first_river", 0., 300.))
+
+        if "tr_first_second" in genes and "second_layer" in genes:
+            params.append(distribution("tr_first_second", 0., 300.))
+
+        if "tr_second_third" in genes:
+            params.append(distribution("tr_second_third", 0., 300.))
+
+        if "tr_second_river" in genes:
+            params.append(distribution("tr_second_river", 0., 300.))
+
+        if "tr_third_river" in genes:
+            params.append(distribution("tr_third_river", 0., 300.))
+
+        # Add betas
+        if "beta_first_out" in genes:
+            params.append(distribution("beta_first_out", 0., 4.))
+
+        if "beta_second_river" in genes:
+            params.append(distribution("beta_second_river", 0., 4.))
+
+        if "beta"
+
+        # Add Snow paramters
+        if "meltrate" in genes:
+            params.append(distribution("meltrate", 0., 15.))
+
+        if "snow_melt_temp" in genes:
+            params.append(distribution("snow_melt_temp", -5.0, 5.0))
+
+        # Add
 
 
         return params

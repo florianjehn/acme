@@ -75,16 +75,26 @@ class LumpedCMFGenerator:
         """
         Sets everything up, ready to be solved.
 
-        :param start_year: year for the start of the calibration period
-        :param end_year: year for the end of the calibration period
-        :param validation_time_span: time after end_year which should be
-        used for calibration
-        :param obj_func: the objective function that should be used (only
-        the name is needed, all objective functions in spotpy are possible)
-        :param distribution: The way the parameters will be distributed (
-        e.g. Weibull)
-        :param et: Method for calculation of evapotranspiration
+        :param begin_calibration:
+        :param end_calibration:
+        :param begin_validation:
+        :param end_validation:
+        :param obj_func:
+        :param optimal_fitness:
+        :param distribution:
+        :param algorithm:
+        :param et:
+        :param prec:
+        :param discharge:
+        :param t_mean:
+        :param t_min:
+        :param t_max:
+        :param max_age:
+        :param pool_size:
+        :param search_iterations:
+        :param obj_func_increment:
         """
+
         # Calibration/Validation stuff
         self.begin_calibration = begin_calibration
         self.end_calibration = end_calibration
@@ -159,7 +169,7 @@ class LumpedCMFGenerator:
                                 pool_size=self.pool_size,
                                 crossover=fn_crossover)
 
-        ### At this place it might be handy to nest the while loop into a
+        # At this place it might be handy to nest the while loop into a
         # for loop. The for loop starts with a value for the objective
         # function below the desired one and the gives the while loop some
         # time to find best model. If this is accomplished a new run is
@@ -185,13 +195,18 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
                 begin_calibration, end_calibration,
                 begin_validation, end_validation):
     """
-    Calculates the fitness of a given genotype.
+        Calculates the fitness of a given genotype.
 
     :param genes: genotype that is to be tested for its fitness
     :param data: the weather data in the form of a dict of lists
     :param obj_func: the objective function that is to be used.
     :param algorithm: The sampling algorithm form Spotpy. For now the use of
                       dream is assumed.
+    :param distribution:
+    :param begin_calibration:
+    :param end_calibration:
+    :param begin_validation:
+    :param end_validation:
     :return: Highest fitness value
     """
     # Check if the model to be generated is able to connect to an output
