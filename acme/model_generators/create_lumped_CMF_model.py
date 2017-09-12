@@ -123,6 +123,7 @@ class LumpedCMFGenerator:
         data = self.data
         obj_func = self.obj_func
         algorithm = self.algorithm
+        distribution = self.distribution
         # Calibration/Validation stuff
         begin_calibration = self.begin_calibration
         end_calibration = self.end_calibration
@@ -138,7 +139,7 @@ class LumpedCMFGenerator:
             display(candidate, start_time)
 
         def fn_get_fitness(genes):
-            return get_fitness(genes, data, obj_func, algorithm,
+            return get_fitness(genes, data, obj_func, algorithm, distribution,
                                begin_calibration, end_calibration,
                                begin_validation, end_validation)
 
@@ -180,7 +181,7 @@ class LumpedCMFGenerator:
         write_all_model()
 
 
-def get_fitness(genes, data, obj_func, algorithm,
+def get_fitness(genes, data, obj_func, algorithm, distribution,
                 begin_calibration, end_calibration,
                 begin_validation, end_validation):
     """
@@ -205,7 +206,8 @@ def get_fitness(genes, data, obj_func, algorithm,
             return LumpedCMFGenerator.models_so_far[old_model]
 
     # If not call the template and run the model
-    current_model = template.LumpedModelCMF(genes, data, obj_func,
+    current_model = template.LumpedModelCMF(genes, data, obj_func, 
+                                            distribution,
                                             begin_calibration, end_calibration,
                                             begin_validation, end_validation)
 

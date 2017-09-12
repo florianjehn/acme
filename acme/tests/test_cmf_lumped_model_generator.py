@@ -85,9 +85,9 @@ class GeneratorsTests(unittest.TestCase):
                                             # start and end dates for
                                             # calibration and validation
                                             datetime.datetime(1980, 1, 1),
-                                            datetime.datetime(1982, 12, 31),
-                                            datetime.datetime(1983, 1, 1),
-                                            datetime.datetime(1984, 12, 31))
+                                            datetime.datetime(1981, 12, 31),
+                                            datetime.datetime(1982, 1, 1),
+                                            datetime.datetime(1983, 12, 31))
             self.assertTrue(fitness > 0)
         else:
             pass
@@ -215,7 +215,6 @@ class GeneratorsTests(unittest.TestCase):
             print("The following genes were in gene_set, but not in genes: "
                   "{}".format(set(self.gene_set) - set(genes)))
             self.assertTrue(False)
-
 
     def test_write_all_model(self):
         pass

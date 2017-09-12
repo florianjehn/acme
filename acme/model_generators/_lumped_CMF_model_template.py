@@ -20,23 +20,70 @@ import acme.model_generators._lookup as _lookup
 
 
 class LumpedModelCMF:
-    def __init__(self, genes, data, obj_func,
+    def __init__(self, genes, data, obj_func, distribution,
                  begin_calibration, end_calibration,
                  begin_validation, end_validation):
         """
 
         :param genotype:
         """
+        # Main things
         self.obj_func = obj_func
         self.genes = genes
         self.data = data
-        self.objective_function = obj_func
-        self.begin = begin
-        self.end = end
+        self.distribution = distribution
+
+        # Date stuff
+        self.begin_calibration = begin_calibration
+        self.end_calibration = end_calibration
+        self.begin_validation = begin_validation
+        self.end_validation = end_validation
+
+        # Empty parameter list to start with
+        self.params = []
+
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+        # Basic Layout, same for all possible models
+        prec = data["prec"]
+        discharge = data["discharge"]
+        t_mean = data["t_mean"]
+        t_min = data["t_min"]
+        t_max = data["t_max"]
+        self.discharge = discharge
+
+        # Use only one core (quicker for smaller models)
+        cmf.set_parallel_threads(1)
+
+        # Generate a project with one cell for a lumped model
+        self.project = cmf.project()
+        p = self.project
+
+        # Add one cell, which will include all other parts. The area is set
+        # to 1000 m², so the units are easier to understand
+        c = p.NewCell(0, 0, 0, 1000)
+
+        # Add a first layer, this one is always present, as a model with no
+        # layers makes no sense
+        first_layer = c.add_layer(2.0)
+
+        # Add an evapotranspiration
+        cmf.HargreaveET(first_layer, c.transpiration)
+
+        # Create the CMF meteo and rain stations
+        self.make_stations(prec, t_mean, t_min, t_max)
+
+        # Create an outlet
+        self.outlet = p.NewOutlet("outlet", 10, 0, 0)
+
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+        # No create all storages which are depended on the genes provided
 
         def basic_layout():
             # include first_layer here, so the model has at least one storage
-            pass
+
+
 
         def set_storages():
             pass
