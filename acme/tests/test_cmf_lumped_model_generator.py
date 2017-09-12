@@ -81,7 +81,13 @@ class GeneratorsTests(unittest.TestCase):
             obj_func = lookup.get_obj_func(obj_func)
             algorithm = "dream"
             algorithm = lookup.get_algorithm(algorithm)
-            fitness = generator.get_fitness(genes, data, obj_func, algorithm)
+            fitness = generator.get_fitness(genes, data, obj_func, algorithm,
+                                            # start and end dates for
+                                            # calibration and validation
+                                            datetime.datetime(1980, 1, 1),
+                                            datetime.datetime(1982, 12, 31),
+                                            datetime.datetime(1983, 1, 1),
+                                            datetime.datetime(1984, 12, 31))
             self.assertTrue(fitness > 0)
         else:
             pass
