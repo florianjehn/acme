@@ -10,13 +10,11 @@ the interface to spotpy.
 
 import datetime
 import os
+import spotpy
+import numpy as np
 # Exclude CMF to allow Travis testing
 if os.name == "nt":
     import cmf
-import spotpy
-import os
-import numpy as np
-import acme.model_generators._lookup as _lookup
 
 
 class LumpedModelCMF:
@@ -24,8 +22,16 @@ class LumpedModelCMF:
                  begin_calibration, end_calibration,
                  begin_validation, end_validation):
         """
+        Sets up the base model in regard to the genes provided.
 
-        :param genotype:
+        :param genes:
+        :param data:
+        :param obj_func:
+        :param distribution:
+        :param begin_calibration:
+        :param end_calibration:
+        :param begin_validation:
+        :param end_validation:
         """
         # Main things
         self.obj_func = obj_func
@@ -79,14 +85,21 @@ class LumpedModelCMF:
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         # No create all storages which are depended on the genes provided
+        if "snow" in self.genes:
+            c.add_storage("snow", "s")
+            cmf.Snowfall(c.snow, c)
 
-        def basic_layout():
-            # include first_layer here, so the model has at least one storage
+        if "canopy" in self.genes:
+            c.add_storage("canopy", "c")
 
+        if "second_layer" in self.genes:
+            c.add_layer(5.0)
 
+        if "third_layer" in self.genes:
+            c.add_layer(10.0)
 
-        def set_storages():
-            pass
+        if "river" in self.genes:
+            c.add_storage("river", "r")
 
 
 

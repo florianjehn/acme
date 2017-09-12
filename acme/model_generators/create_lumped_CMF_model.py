@@ -47,7 +47,7 @@ class LumpedCMFGenerator:
     gene_set = storages + connections + params
 
     # List to save all models that have been tested so far. The key is
-    # the genes in the model and the value the best objective function
+    # the genes in the model and the value the best objective function value.
     models_so_far = {}
 
     def __init__(self, begin_calibration,
