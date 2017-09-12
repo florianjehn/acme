@@ -10,6 +10,8 @@ import datetime
 import copy
 import math
 import os
+import acme.model_generators._lookup as lookup
+
 
 # Only import cmf if the test is run on windows, so Travis does not try to
 # import a non existing thing
@@ -53,10 +55,12 @@ class GeneratorsTests(unittest.TestCase):
 
     def test_get_fitness(self):
         """
-        Calls the get_fitness function with a mockup model setup, which contains all possible genes. To test if it runs correctly.
+        Calls the get_fitness function with a mockup model setup, which
+        contains all possible genes. To test if it runs correctly.
 
         :return: None
         """
+        # Exclude from Travis.
         if os.name == "nt":
             genes = generator.LumpedCMFGenerator.gene_set
             precipitation, temperature_avg, temperature_min, \
@@ -66,7 +70,7 @@ class GeneratorsTests(unittest.TestCase):
                 "Prec_Grebenau_1979_1988.txt",
                 2976.41
             )
-            data = data = {
+            data = {
                 "prec": precipitation,
                 "discharge": discharge,
                 "t_mean": temperature_avg,
@@ -74,12 +78,13 @@ class GeneratorsTests(unittest.TestCase):
                 "t_max": temperature_max
             }
             obj_func = "nashsutcliffe"
+            obj_func = lookup.get_obj_func(obj_func)
             algorithm = "dream"
+            algorithm = lookup.get_algorithm(algorithm)
             fitness = generator.get_fitness(genes, data, obj_func, algorithm)
             self.assertTrue(fitness > 0)
         else:
             pass
-
 
     def test_display(self):
         """
