@@ -45,8 +45,8 @@ class LumpedModelCMF:
         self.begin_validation = begin_validation
         self.end_validation = end_validation
 
-        # Empty parameter list to start with
-        self.params = []
+        # Create params list
+        self.params = self.create_params_from_genes(self.genes)
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -84,7 +84,7 @@ class LumpedModelCMF:
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        # No create all storages which are depended on the genes provided
+        # Now create all storages which are depended on the genes provided
         if "snow" in self.genes:
             c.add_storage("snow", "s")
             cmf.Snowfall(c.snow, c)
@@ -101,9 +101,22 @@ class LumpedModelCMF:
         if "river" in self.genes:
             c.add_storage("river", "r")
 
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+        # Now create all parameters which are needed to for the gene set up
+
+    @staticmethod
+    def create_params_from_genes(genes):
+        """
+        Creates the param list, which is needed for SPOTPY. It is static
+        so it can be tested without creating an template instance.
+        :return: params list
+        """
+        params = []
 
 
 
+        return params
 
 
     def setparameters(self, **kwargs):

@@ -5,6 +5,7 @@ Created on Aug 17 14:17 2017
 """
 import unittest
 from acme.model_generators import create_lumped_CMF_model as generator
+from acme.model_generators import _lumped_CMF_model_template as template
 import acme.genetics as genetics
 import datetime
 import copy
@@ -30,7 +31,7 @@ class GeneratorsTests(unittest.TestCase):
         #     temperature_file = "Temp_max_min_avg_1979_1988.txt"
         #     precipitation_file = "Prec_Grebenau_1979_1988.txt"
         #     P, T, Tmin, Tmax, Q = load_data(discharge_file, temperature_file,
-        #                                     precipitation_file, area_catchment)
+        #                                   precipitation_file, area_catchment)
         #
         #     lumped_model_generator = generator.LumpedCMFGenerator(
         #         1980,
@@ -198,6 +199,17 @@ class GeneratorsTests(unittest.TestCase):
                 not_empty += 1
         print("not_empty = {}".format(not_empty))
         self.assertTrue(isinstance(genes, list) and not_empty > 900)
+
+    def test_create_params_from_genes(self):
+        """
+        Tests if the method create_params_from_genes from the CMF lumped
+        model template creates the param list correctly.
+        """
+        genes = generator.LumpedCMFGenerator.gene_set
+        params = template.LumpedModelCMF.create_params_from_genes(genes)
+        self.assertTrue(len(params) == len(genes)
+                        and
+                        params[0].optguess is not None)
 
     def test_create_all_possible_genes_present(self):
         """
