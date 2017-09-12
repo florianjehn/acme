@@ -207,9 +207,19 @@ class GeneratorsTests(unittest.TestCase):
         """
         genes = generator.LumpedCMFGenerator.gene_set
         params = template.LumpedModelCMF.create_params_from_genes(genes)
+
+        params_names = []
+        for param in params:
+            params_names.append(param.name)
+                        # Must be equally long
         self.assertTrue(len(params) == len(genes)
                         and
-                        params[0].optguess is not None)
+                        # Check if the param is created as an
+                        # distribution object
+                        params[0].optguess is not None
+                        and
+                        # Both lists should be the same if all worked well
+                        set(genes) == set(params_names))
 
     def test_create_all_possible_genes_present(self):
         """
