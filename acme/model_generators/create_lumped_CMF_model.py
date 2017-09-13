@@ -16,6 +16,7 @@ import acme.genetics.genetic as genetic
 import datetime
 import random
 import os
+import copy
 
 
 class LumpedCMFGenerator:
@@ -220,6 +221,22 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
         if set(old_model_genes) == set(genes):
             return LumpedCMFGenerator.models_so_far[old_model]
 
+    # Man könnte auch hier eine Funktion schreiben, die eine Kopie von
+    # genes anlegt und daraus alle Sachen lösch die nicht für das
+    # aktuelle genom nötig sind und dann das ganze erst dann an das template
+    #  weitergibt um damit den wirklichen Modellauf auszuführen.
+
+    # Nimm die maximalen Storages die es gibt von der Generator Classe
+
+    # Lösche alle layer Teile der Strings
+
+    # Durchsuche das Genomcopy nach Parametern, die immer noch diese Sachen
+    # haben
+
+    # Lösche diese aus der Genomcopy
+
+    # Übergebe die Genomcopy dem Template
+
     # If not call the template and run the model
     current_model = template.LumpedModelCMF(genes, data, obj_func, 
                                             distribution,
@@ -308,7 +325,6 @@ def mutate(genes, gene_set):
                                     initial_genes[index]
                                     else
                                     new_gene)
-    # Check it outlet is still present
     return
 
 

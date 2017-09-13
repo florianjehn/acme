@@ -32,6 +32,8 @@ class LumpedModelCMF:
         :param end_calibration:
         :param begin_validation:
         :param end_validation:
+        :param possible_params: A dictionary with all possible different
+        params for this model and what storage they are related too
         """
         # Main things
         self.obj_func = obj_func
@@ -102,7 +104,6 @@ class LumpedModelCMF:
         if "river" in self.genes:
             c.add_storage("river", "r")
 
-
     @staticmethod
     def create_params_from_genes(genes, distribution):
         """
@@ -127,7 +128,54 @@ class LumpedModelCMF:
 
         # All layers and the river exist
         if second_layer and third_layer and river:
-            pass
+            # Add transition times
+            if "tr_first_out" in genes:
+                params.append(distribution("tr_first_out", 0., 300.))
+
+            if "tr_first_river" in genes and "river" in genes:
+                params.append(distribution("tr_first_river", 0., 300.))
+
+            if "tr_first_second" in genes and "second_layer" in genes:
+                params.append(distribution("tr_first_second", 0., 300.))
+
+            if "tr_second_third" in genes:
+                params.append(distribution("tr_second_third", 0., 300.))
+
+            if "tr_second_river" in genes:
+                params.append(distribution("tr_second_river", 0., 300.))
+
+            if "tr_third_river" in genes:
+                params.append(distribution("tr_third_river", 0., 300.))
+
+            # The river tr is added by default.
+            params.append(distribution("tr_river_out", 0., 300.))
+
+            # Add betas
+            if "beta_first_out" in genes:
+                params.append(distribution("beta_first_out", 0., 4.))
+
+            if "beta_first_river" in genes:
+                params.append(distribution("beta_first_river", 0., 4.))
+
+            if "beta_first_second" in genes:
+                params.append(distribution("beta_first_second", 0., 4.))
+
+            if "beta_second_river" in genes:
+                params.append(distribution("beta_second_river", 0., 4.))
+
+            if "beta_second_third" in genes:
+                params.append(distribution("beta_second_third", 0., 4.))
+
+            if "beta_third_river" in genes:
+                params.append(distribution("beta_third_river", 0., 4.))
+
+            if "beta_river_out" in genes:
+                params.append(distribution("beta_river_out", 0., 4.))
+
+            # Add V0s
+            if "v0_first_river" in
+
+
         # All layers, but not the river exis
         elif second_layer and third_layer and not river:
             pass
@@ -148,31 +196,7 @@ class LumpedModelCMF:
 
 
 
-        # Add transition times
-        if "tr_first_out" in genes:
-            params.append(distribution("tr_first_out", 0., 300.))
 
-        if "tr_first_river" in genes and "river" in genes:
-            params.append(distribution("tr_first_river", 0., 300.))
-
-        if "tr_first_second" in genes and "second_layer" in genes:
-            params.append(distribution("tr_first_second", 0., 300.))
-
-        if "tr_second_third" in genes:
-            params.append(distribution("tr_second_third", 0., 300.))
-
-        if "tr_second_river" in genes:
-            params.append(distribution("tr_second_river", 0., 300.))
-
-        if "tr_third_river" in genes:
-            params.append(distribution("tr_third_river", 0., 300.))
-
-        # Add betas
-        if "beta_first_out" in genes:
-            params.append(distribution("beta_first_out", 0., 4.))
-
-        if "beta_second_river" in genes:
-            params.append(distribution("beta_second_river", 0., 4.))
 
 
         # Add Snow paramters
@@ -218,12 +242,6 @@ class LumpedModelCMF:
         def only_third_layer():
             pass
 
-        # Setze den Water-Uptakestress
-        c.set_uptakestress(cmf.VolumeStress(ETV1, ETV1 * fETV0))
-        cmf.kinematic_wave(c.layers[0], outlet, tr / V0, exponent=beta,
-                           residual=Vr, V0=V0)
-        c.layers[0].volume = initVol
-        # TODO: Anpassen an ACME
 
     def make_stations(self, prec, temp, temp_min, temp_max):
         """
