@@ -117,6 +117,37 @@ class LumpedModelCMF:
         params.append(distribution("ETV1", 0., 200.))
         params.append(distribution("fETV0", 0., 0.5))
 
+        # Determine which storages exists:
+        river = "river" in genes
+        second_layer = "second_layer" in genes
+        third_layer = "third_layer" in genes
+
+        # Allow the creation of the different parameters depending on the
+        # existence of the different storages
+
+        # All layers and the river exist
+        if second_layer and third_layer and river:
+            pass
+        # All layers, but not the river exis
+        elif second_layer and third_layer and not river:
+            pass
+        # The second or third layer exist (which one does not matter,
+        # as it will result in a two storage model either way)
+        # and the river exists too
+        elif (second_layer or third_layer) and river:
+            pass
+        # The second or the third layer exist but not the river
+        elif (second_layer or third_layer) and not river:
+            pass
+        # Only one layer and the river exist
+        elif not second_layer and not third_layer and river:
+            pass
+        # Only one layer exists
+        elif not second_layer and not third_layer and not river:
+            pass
+
+
+
         # Add transition times
         if "tr_first_out" in genes:
             params.append(distribution("tr_first_out", 0., 300.))
@@ -143,7 +174,6 @@ class LumpedModelCMF:
         if "beta_second_river" in genes:
             params.append(distribution("beta_second_river", 0., 4.))
 
-        if "beta"
 
         # Add Snow paramters
         if "meltrate" in genes:
