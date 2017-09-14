@@ -466,7 +466,7 @@ def create(test=False):
     return genes
 
 
-def write_all_model():
+def write_all_models():
     """
     Writes all the models to a file.
 

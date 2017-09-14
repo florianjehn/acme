@@ -270,8 +270,21 @@ class GeneratorsTests(unittest.TestCase):
                         "tr_second_out" not in genes_copy
                         )
 
-    def test_write_all_model(self):
-        pass
+    def test_write_all_models(self):
+        """
+        Tests if a file is written by calling the method write_all_models
+        :return:
+        """
+        model_1 = ["snow", "second", "beta_second_river"]
+        model_1_str = " ".join(model_1)
+        model_1_like = 0.78
+        model_2 = ["canopy", "third"]
+        model_2_str = " ".join(model_2)
+        model_2_like = 0.71
+        models_so_far = generator.LumpedCMFGenerator.models_so_far
+        models_so_far[model_1_str] = model_1_like
+        models_so_far[model_2_str] = model_2_like
+        generator.write_all_models()
 
 
 def load_data(discharge_file, temperature_file, precipitation_file,
