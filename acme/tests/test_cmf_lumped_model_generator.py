@@ -272,8 +272,9 @@ class GeneratorsTests(unittest.TestCase):
 
     def test_write_all_models(self):
         """
-        Tests if a file is written by calling the method write_all_models
-        :return:
+        Tests if a file is written by calling the method write_all_models.
+
+        :return: None
         """
         model_1 = ["snow", "second", "beta_second_river"]
         model_1_str = " ".join(model_1)
@@ -285,6 +286,9 @@ class GeneratorsTests(unittest.TestCase):
         models_so_far[model_1_str] = model_1_like
         models_so_far[model_2_str] = model_2_like
         generator.write_all_models()
+        # Delete them again, to not cause trouble when the program itself runs
+        del models_so_far[model_1_str]
+        del models_so_far[model_2_str]
 
 
 def load_data(discharge_file, temperature_file, precipitation_file,

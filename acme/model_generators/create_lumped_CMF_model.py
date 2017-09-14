@@ -476,12 +476,18 @@ def write_all_models():
     outfile = open('acme_results.csv', 'w')
 
     # Make the header
-    header = "Like" + "Genes"
+    header = "Like" + ", " + "Genes" + "\n"
     outfile.write(header)
 
     # Write the entries
-    for genes, like in LumpedCMFGenerator.models_so_far:
-        outfile.write([like, genes])
+    for genes, like in LumpedCMFGenerator.models_so_far.items():
+        # Exclude the non active genes before writing it down
+        genes_copy = genes.split()
+        genes_copy = del_params_without_storage(genes_copy)
+        genes_copy = ", ".join(genes_copy)
+        line = str(like) + ", " + genes_copy + "\n"
+        outfile.write(line)
+    outfile.close()
 
 
 def check_for_connection(genes):
