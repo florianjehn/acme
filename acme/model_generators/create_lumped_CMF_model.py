@@ -263,8 +263,11 @@ def del_params_without_storage(genes):
     """
     # Make a copy, so the original
     genes_copy = copy.deepcopy(genes)
+    # Add the first layer to the copy, so the connections  from first are
+    # not all deleted by default.
+    genes_copy = genes_copy + ["first"]
     # Go through all storages
-    storages = LumpedCMFGenerator.storages + ["first"]
+    storages = LumpedCMFGenerator.storages
     for gene in genes_copy:
         # Delete all params which do not have their storage present
         storage_present = False
@@ -272,7 +275,7 @@ def del_params_without_storage(genes):
             if storage in gene:
                 storage_present = True
         if not storage_present:
-            genes_copy.remove()
+            genes_copy.remove(gene)
 
     return genes_copy
 
@@ -362,7 +365,6 @@ def crossover(first_parent, second_parent):
     # Create a set out of it to avoid duplicates
     # then turn it back to a list and return it
     child_genes = list(set(child_genes))
-    # Check if outlet is still present
     return child_genes
 
 

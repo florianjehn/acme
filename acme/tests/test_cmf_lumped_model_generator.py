@@ -241,6 +241,29 @@ class GeneratorsTests(unittest.TestCase):
                   "{}".format(set(self.gene_set) - set(genes)))
             self.assertTrue(False)
 
+    def test_del_params_without_storage(self):
+        """
+        Tests if only the inactive genes are deleted.
+
+        :return: None
+        """
+        genes = ["snow", "snow_meltrate", "tr_first_out", "first",
+                 "tr_second_out"]
+        genes_copy = generator.del_params_without_storage(genes)
+
+        # From this test set tr_second_out should be deleted. All other
+        # connections shoud remain.
+        self.assertTrue("snow" in genes_copy
+                        and
+                        "snow_meltrate" in genes_copy
+                        and
+                        "tr_first_out" in genes_copy
+                        and
+                        "first" in genes_copy
+                        and
+                        "tr_second_out" not in genes_copy
+                        )
+
     def test_write_all_model(self):
         pass
 

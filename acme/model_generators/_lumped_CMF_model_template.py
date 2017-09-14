@@ -172,8 +172,6 @@ class LumpedModelCMF:
             if "beta_river_out" in genes:
                 params.append(distribution("beta_river_out", 0., 4.))
 
-            # Add V0s
-            if "v0_first_river" in
 
 
         # All layers, but not the river exis
