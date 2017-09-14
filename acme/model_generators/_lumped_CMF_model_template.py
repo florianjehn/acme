@@ -95,10 +95,10 @@ class LumpedModelCMF:
         if "canopy" in self.genes:
             c.add_storage("canopy", "c")
 
-        if "second_layer" in self.genes:
+        if "second" in self.genes:
             c.add_layer(5.0)
 
-        if "third_layer" in self.genes:
+        if "third" in self.genes:
             c.add_layer(10.0)
 
         if "river" in self.genes:

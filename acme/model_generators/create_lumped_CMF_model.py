@@ -265,15 +265,23 @@ def del_params_without_storage(genes):
     genes_copy = copy.deepcopy(genes)
     # Add the first layer to the copy, so the connections  from first are
     # not all deleted by default.
-    genes_copy = genes_copy + ["first"]
-    # Go through all storages
-    storages = LumpedCMFGenerator.storages
+    genes_copy = genes_copy
+    # Determine which storages are present in the genes
+    possible_storages = LumpedCMFGenerator.storages + ["first"]
+    actual_storages = []
+    for possible_storage in possible_storages:
+        for gene in genes_copy:
+            if possible_storage == gene:
+                actual_storages.append(gene)
+
+    # Go through all genes to test if their storage is present.
     for gene in genes_copy:
         # Delete all params which do not have their storage present
         storage_present = False
-        for storage in storages:
+        for storage in actual_storages:
             if storage in gene:
                 storage_present = True
+                break
         if not storage_present:
             genes_copy.remove(gene)
 
@@ -282,7 +290,8 @@ def del_params_without_storage(genes):
 
 def display(candidate, start_time):
     """
-    Display the current candidate and his fitness
+    Display the current candidate and his fitness.
+
     :param candidate: Model/genotype that is to be displayed
     :param start_time: Time when the current program started
     :return: None

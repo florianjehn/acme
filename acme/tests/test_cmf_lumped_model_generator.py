@@ -257,8 +257,8 @@ class GeneratorsTests(unittest.TestCase):
 
         # From this test set tr_second_out should be deleted. All other
         # connections should remain.
-        print("Genes is {}".format(genes))
-        print("Genes_copy is {}".format(genes_copy))
+        print("genes is {}".format(genes))
+        print("genes_copy is {}".format(genes_copy))
         self.assertTrue("snow" in genes_copy
                         and
                         "snow_meltrate" in genes_copy
