@@ -82,7 +82,10 @@ class GeneratorsTests(unittest.TestCase):
             obj_func = lookup.get_obj_func(obj_func)
             algorithm = "dream"
             algorithm = lookup.get_algorithm(algorithm)
+            distribution = "Uniform"
+            distribution = lookup.get_distribution(distribution)
             fitness = generator.get_fitness(genes, data, obj_func, algorithm,
+                                            distribution,
                                             # start and end dates for
                                             # calibration and validation
                                             datetime.datetime(1980, 1, 1),
@@ -228,7 +231,8 @@ class GeneratorsTests(unittest.TestCase):
         """
         Calls create() with the test variable, which triggers all control
         flows to be true. Thus creating a model with all possible genes.
-        This should equal the gene_set
+        This should equal the gene_set.
+
         :return: None
         """
         genes = generator.create(test=True)
@@ -252,7 +256,9 @@ class GeneratorsTests(unittest.TestCase):
         genes_copy = generator.del_params_without_storage(genes)
 
         # From this test set tr_second_out should be deleted. All other
-        # connections shoud remain.
+        # connections should remain.
+        print("Genes is {}".format(genes))
+        print("Genes_copy is {}".format(genes_copy))
         self.assertTrue("snow" in genes_copy
                         and
                         "snow_meltrate" in genes_copy

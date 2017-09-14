@@ -384,7 +384,7 @@ def create(test=False):
         genes.append("snow")
         # Only add the snow parameter genes if there is a snow storage
         if random.random() < threshold or test:
-            genes.append("meltrate")
+            genes.append("snow_meltrate")
         if random.random() < threshold or test:
             genes.append("snow_melt_temp")
 
@@ -394,13 +394,13 @@ def create(test=False):
         if random.random() < threshold or test:
             genes.append("canopy_closure")
         if random.random() < threshold or test:
-            genes.append("lai")
+            genes.append("canopy_lai")
 
     # Layers
     if random.random() < threshold or test:
-        genes.append("second_layer")
+        genes.append("second")
         if random.random() < threshold or test:
-            genes.append("third_layer")
+            genes.append("third")
 
     if random.random() < threshold or test:
         genes.append("river")
@@ -428,7 +428,7 @@ def create(test=False):
             genes.append("v0_first_out")
 
     # Connections second layer
-    if "second_layer" in genes:
+    if "second" in genes:
         # loop through until second_layer has a connection so somewhere
         while "tr_second_third" not in genes or "tr_second_river" not in genes:
             if random.random() < threshold or test:
@@ -441,7 +441,7 @@ def create(test=False):
                     genes.append("beta_second_river")
 
     # Connections third layer
-    if "third_layer" in genes:
+    if "third" in genes:
         # always add a connection, otherwise third_layer would be a dead end
         genes.append("tr_third_river")
         if random.random() < threshold or test:
