@@ -26,12 +26,12 @@ class LumpedCMFGenerator:
     # "first_layer" is excluded, as a model without any storage makes no sense.
     # The possible parameters are defined for the class as a whole as they
     # are equal for all instances and are easier to access this way.
-    storages = ["snow", "canopy", "second_layer", "third_layer", "river"]
+    storages = ["snow", "canopy", "second", "third", "river"]
     connections = ["tr_first_out", "tr_first_river", "tr_first_second",
                    "tr_second_third", "tr_second_river",
                    "tr_third_river"]
-    snow_params = ["meltrate", "snow_melt_temp"]
-    canopy_params = ["lai", "canopy_closure"]
+    snow_params = ["snow_meltrate", "snow_melt_temp"]
+    canopy_params = ["canopy_lai", "canopy_closure"]
     # ET params excluded as a ETact that is always ETpot makes no sense
     # et_params = ["etv0", "fetv0"]
     first_layer_params = ["beta_first_out", "beta_first_river",
