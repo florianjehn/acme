@@ -16,6 +16,6 @@ install:
 # command to run tests
 script:
   - python acme/tests/test_genetics.py
-  - python acme/tests/test_model_generators.py
+  - python acme/tests/test_cmf_lumped_model_generator.py
   - python acme/tests/test_visualization.py
   - python acme/tests/test_examples.py
