@@ -212,6 +212,12 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
     """
     # Check if the model to be generated is able to connect to an output
     check_for_connection(genes)
+
+    # Make a copy of the genes, so the original remains intact and delete
+    # all unneccseary genes in the copy. This way the usage of the template
+    # is easiert.
+    genes_copy = del_params_without_storage(genes)
+
     # Compare if the genes the function gets, have already been calculated
     #  as a model
     for old_model in LumpedCMFGenerator.models_so_far.keys():
@@ -221,24 +227,8 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
         if set(old_model_genes) == set(genes):
             return LumpedCMFGenerator.models_so_far[old_model]
 
-    # Man könnte auch hier eine Funktion schreiben, die eine Kopie von
-    # genes anlegt und daraus alle Sachen lösch die nicht für das
-    # aktuelle genom nötig sind und dann das ganze erst dann an das template
-    #  weitergibt um damit den wirklichen Modellauf auszuführen.
-
-    # Nimm die maximalen Storages die es gibt von der Generator Classe
-
-    # Lösche alle layer Teile der Strings
-
-    # Durchsuche das Genomcopy nach Parametern, die immer noch diese Sachen
-    # haben
-
-    # Lösche diese aus der Genomcopy
-
-    # Übergebe die Genomcopy dem Template
-
     # If not call the template and run the model
-    current_model = template.LumpedModelCMF(genes, data, obj_func, 
+    current_model = template.LumpedModelCMF(genes_copy, data, obj_func,
                                             distribution,
                                             begin_calibration, end_calibration,
                                             begin_validation, end_validation)
@@ -249,7 +239,7 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
     sampler = algorithm(current_model, parallel=parallel, dbformat="noData")
 
     # The template runs until the predefined convergence value of dream is
-    #  reached (or the maximal value for repetitions is reached).
+    # reached (or the maximal value for repetitions is reached).
     sampler.sample(500, convergence_limit=1.6)
 
     # Extract the best value from the model
@@ -261,6 +251,30 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
 
     # Return best fitness value of all runs
     return best_like
+
+
+def del_params_without_storage(genes):
+    """
+    Deletes all parameters which do not have their storage present in the
+    current genes
+
+    :param genes: Current genes
+    :return: Copy of current genes, with only the active genes in it.
+    """
+    # Make a copy, so the original
+    genes_copy = copy.deepcopy(genes)
+    # Go through all storages
+    storages = LumpedCMFGenerator.storages + ["first"]
+    for gene in genes_copy:
+        # Delete all params which do not have their storage present
+        storage_present = False
+        for storage in storages:
+            if storage in gene:
+                storage_present = True
+        if not storage_present:
+            genes_copy.remove()
+
+    return genes_copy
 
 
 def display(candidate, start_time):
