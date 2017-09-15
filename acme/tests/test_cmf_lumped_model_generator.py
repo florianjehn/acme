@@ -297,19 +297,28 @@ class GeneratorsTests(unittest.TestCase):
         """
         pass
 
-    def test_del_storages_with_no_inflow(self):
+
+    def test_del_inactive_storages(self):
         """
 
         :return:
         """
         pass
 
-    def test_del_storages_with_no_outflow(self):
-        """
 
-        :return:
+    def test_split_param_names(self):
         """
-        pass
+        Tests if split_param_names splits the names correctly.
+
+        :return: None
+        """
+        names = ["tr_first_out", "tr_second_river", "tr_third_river"]
+        splitted = generator.split_param_names(names)
+        self.assertTrue(len(splitted) == 3
+                        and
+                        len(splitted[0]) == 3
+                        and
+                        splitted[1][1] == "second")
 
 
 def load_data(discharge_file, temperature_file, precipitation_file,

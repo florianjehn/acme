@@ -263,6 +263,7 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
     # Return best fitness value of all runs
     return best_like
 
+
 def find_effective_structure(genes):
     """
     Calls all other methods which strip the genes to only the active ones.
@@ -325,7 +326,7 @@ def del_params_without_connection(genes):
     return genes
 
 
-def del_storages_with_no_inflow(genes):
+def del_inactive_storages(genes):
     """
     Deletes all storages, which have no inflow from any source.
 
@@ -335,13 +336,15 @@ def del_storages_with_no_inflow(genes):
     return genes
 
 
-def del_storages_with_no_outflow(genes):
+def split_param_names(names):
     """
-    Deletes all stsorages which have no outflow to any other storage.
-    :param genes:
-    :return:
+    Splits a bunch of parameter names into the name itself and the source,
+    and target respectively.
+
+    :param names:
+    :return: Splitted names
     """
-    return genes
+    pass
 
 
 def display(candidate, start_time):
