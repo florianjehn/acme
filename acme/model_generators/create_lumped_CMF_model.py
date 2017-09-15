@@ -276,8 +276,7 @@ def find_effective_structure(genes):
     # Delete all inactive stuff
     genes_copy = del_params_without_storage(genes_copy)
     genes_copy = del_params_without_connection(genes_copy)
-    genes_copy = del_storages_with_no_inflow(genes_copy)
-    genes_copy = del_storages_with_no_outflow(genes_copy)
+    genes_copy = del_inactive_storages(genes_copy)
 
     return genes_copy
 
