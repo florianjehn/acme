@@ -263,6 +263,23 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
     # Return best fitness value of all runs
     return best_like
 
+def find_effective_structure(genes):
+    """
+    Calls all other methods which strip the genes to only the active ones.
+
+    :param genes: Current genes
+    :return: Copy of current genes, with only the active genes in it.
+    """
+    # Make a copy, so the original
+    genes_copy = copy.deepcopy(genes)
+    # Delete all inactive stuff
+    genes_copy = del_params_without_storage(genes_copy)
+    genes_copy = del_params_without_connection(genes_copy)
+    genes_copy = del_storages_with_no_inflow(genes_copy)
+    genes_copy = del_storages_with_no_outflow(genes_copy)
+
+    return genes_copy
+
 
 def del_params_without_storage(genes):
     """
@@ -270,23 +287,21 @@ def del_params_without_storage(genes):
     current genes
 
     :param genes: Current genes
-    :return: Copy of current genes, with only the active genes in it.
+    :return: Copy with of the current genes, with all
     """
-    # Make a copy, so the original
-    genes_copy = copy.deepcopy(genes)
+
     # Add the first layer to the copy, so the connections  from first are
     # not all deleted by default.
-    genes_copy = genes_copy
     # Determine which storages are present in the genes
     possible_storages = LumpedCMFGenerator.storages + ["first"]
     actual_storages = []
     for possible_storage in possible_storages:
-        for gene in genes_copy:
+        for gene in genes:
             if possible_storage == gene:
                 actual_storages.append(gene)
 
     # Go through all genes to test if their storage is present.
-    for gene in genes_copy:
+    for gene in genes:
         # Delete all params which do not have their storage present
         storage_present = False
         for storage in actual_storages:
@@ -294,9 +309,9 @@ def del_params_without_storage(genes):
                 storage_present = True
                 break
         if not storage_present:
-            genes_copy.remove(gene)
+            genes.remove(gene)
 
-    return genes_copy
+    return genes
 
 
 def del_params_without_connection(genes):
@@ -307,7 +322,7 @@ def del_params_without_connection(genes):
     :param genes: Current genes
     :return: Copy of current genes, with only the active genes in it.
     """
-    pass
+    return genes
 
 
 def del_storages_with_no_inflow(genes):
@@ -317,7 +332,7 @@ def del_storages_with_no_inflow(genes):
     :param genes:
     :return:
     """
-    pass
+    return genes
 
 
 def del_storages_with_no_outflow(genes):
@@ -326,7 +341,7 @@ def del_storages_with_no_outflow(genes):
     :param genes:
     :return:
     """
-    pass
+    return genes
 
 
 def display(candidate, start_time):

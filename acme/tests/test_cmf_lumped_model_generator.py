@@ -290,6 +290,27 @@ class GeneratorsTests(unittest.TestCase):
         del models_so_far[model_1_str]
         del models_so_far[model_2_str]
 
+    def test_del_params_without_connections(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def test_del_storages_with_no_inflow(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def test_del_storages_with_no_outflow(self):
+        """
+
+        :return:
+        """
+        pass
+
 
 def load_data(discharge_file, temperature_file, precipitation_file,
               area_catchment):
