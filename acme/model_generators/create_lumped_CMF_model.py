@@ -20,12 +20,16 @@ import copy
 
 
 class LumpedCMFGenerator:
-    # Define gen set
+    # Define gene_set
     # This is done so widespread to make it more readable and also allow
     #  it later to check for what is in what.
     # "first_layer" is excluded, as a model without any storage makes no sense.
     # The possible parameters are defined for the class as a whole as they
     # are equal for all instances and are easier to access this way.
+
+    # The storages "first", "second" and "third" refer to "first_layer"
+    # "second_layer" and "third_layer" respectively and are shortened for
+    # better handling.
     storages = ["snow", "canopy", "second", "third", "river"]
     connections = ["tr_first_out", "tr_first_river", "tr_first_second",
                    "tr_second_third", "tr_second_river",
@@ -127,7 +131,8 @@ class LumpedCMFGenerator:
         """
         Starts the process of model selection.
 
-        Calls the genetic file with all needed informations.
+        Calls the genetic file with all needed information.
+
         :return: None, but writes the best found model to a file
         """
         # Make the needed variables available for the helper functions.
@@ -178,7 +183,7 @@ class LumpedCMFGenerator:
         #  repeated until the algorithm is no longer able to find a model
         # which satisfies the condition.
 
-        # Sth like
+        # Something like
         if self.search_iterations > 1:
             for iteration in range(self.search_iterations):
                 pass
@@ -189,7 +194,7 @@ class LumpedCMFGenerator:
                 pass
 
         # Write the best model to file.
-        write_all_model()
+        write_all_models()
 
 
 def get_fitness(genes, data, obj_func, algorithm, distribution,
@@ -220,6 +225,12 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
 
     # Compare if the genes the function gets, have already been calculated
     #  as a model
+    # TODO: First check if a model with the current genes has already be
+    # TODO: calculated. If so, return the fitness value of the model.
+    # TODO: If not determine the effective structure and check if the
+    # TODO: effective structure has already been used. If so save the
+    # TODO: original structure with the same fitness value as the already
+    # TODO: calculated effective structure.
     for old_model in LumpedCMFGenerator.models_so_far.keys():
         # Turn model in list version
         old_model_genes = old_model.split()
@@ -286,6 +297,36 @@ def del_params_without_storage(genes):
             genes_copy.remove(gene)
 
     return genes_copy
+
+
+def del_params_without_connection(genes):
+    """
+    Deletes all parameters which do not have their connection present in the
+    current genes.
+
+    :param genes: Current genes
+    :return: Copy of current genes, with only the active genes in it.
+    """
+    pass
+
+
+def del_storages_with_no_inflow(genes):
+    """
+    Deletes all storages, which have no inflow from any source.
+
+    :param genes:
+    :return:
+    """
+    pass
+
+
+def del_storages_with_no_outflow(genes):
+    """
+    Deletes all stsorages which have no outflow to any other storage.
+    :param genes:
+    :return:
+    """
+    pass
 
 
 def display(candidate, start_time):
