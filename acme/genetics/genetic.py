@@ -166,11 +166,11 @@ def _get_improvement(new_child, generate_parent, max_age, pool_size):
     # Since we have a pool of parents, each time through the loop select a
     # different one to be the current parent.
     last_parent_index = pool_size - 1
-    pindex = 1
+    p_index = 1
     while True:
-        pindex = pindex - 1 if pindex > 0 else last_parent_index
-        parent = parents[pindex]
-        child = new_child(parent, pindex, parents)
+        p_index = p_index - 1 if p_index > 0 else last_parent_index
+        parent = parents[p_index]
+        child = new_child(parent, p_index, parents)
         # Try again if the best parent is better then the child
         if parent.fitness > child.fitness:
             if max_age is None:
@@ -192,9 +192,9 @@ def _get_improvement(new_child, generate_parent, max_age, pool_size):
             # 0.36 (fitness close to best fitness) and 1 (fitness far away
             # from best fitness)
             if random.random() < exp(-proportion_similar):
-                parents[pindex] = child
+                parents[p_index] = child
                 continue
-            parents[pindex] = best_parent
+            parents[p_index] = best_parent
             parent.age = 0
             continue
         # This if is used to retain children which have the same fitness as
@@ -203,9 +203,9 @@ def _get_improvement(new_child, generate_parent, max_age, pool_size):
         # it is not returned but only used for further mutation.
         if not child.fitness > parent.fitness:
             child.age = parent.age + 1
-            parents[pindex] = child
+            parents[p_index] = child
             continue
-        parents[pindex] = child
+        parents[p_index] = child
         parent.age = 0
         # Return the child if it better than the best parent so far.
         if child.fitness > best_parent.fitness:
