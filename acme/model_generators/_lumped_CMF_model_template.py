@@ -190,11 +190,6 @@ class LumpedModelCMF:
         elif not second_layer and not third_layer and not river:
             pass
 
-
-
-
-
-
         # Add Snow paramters
         if "meltrate" in genes:
             params.append(distribution("meltrate", 0., 15.))
@@ -257,7 +252,6 @@ class LumpedModelCMF:
         self.project.use_nearest_meteo()
         return rainstation
 
-        return rainstation
     # TODO: Anpassen an ACME
 
     def run_model(self):
@@ -313,4 +307,7 @@ class LumpedModelCMF:
         """
         For Spotpy. Tells Spotpy how the model is to be evaluated.
         """
+        # Todo: Hier noch hydrological signatures?
+        # Todo: Hier immer Kling Gupta?
+        # Todo: Wie lösen, dass DREAM bestimmte obj_func brauch?
         return self.objective_function(evaluation, simulation)

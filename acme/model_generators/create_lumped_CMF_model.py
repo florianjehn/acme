@@ -167,6 +167,9 @@ class LumpedCMFGenerator:
 
         start_time = datetime.datetime.now()
 
+
+        # Todo: Include max time from genetics book
+
         # Give all definitions to the get_best function of genetic to start
         # the whole process of evolutionary selection
         best = genetic.get_best(fn_get_fitness, None, self.optimal_fitness,
@@ -248,6 +251,12 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
     parallel = 'mpi' if 'OMPI_COMM_WORLD_SIZE' in os.environ else 'seq'
 
     sampler = algorithm(current_model, parallel=parallel, dbformat="noData")
+
+    # Todo: Hier noch irgendwie einbauen das die hydrological signatures
+    # zuerst geteteset werden und ein niedriger Fitnesswert vergeben wird,
+    # wenn das Modell schlecht ist.
+    # Oder muss das in das Template?
+
 
     # The template runs until the predefined convergence value of dream is
     # reached (or the maximal value for repetitions is reached).
