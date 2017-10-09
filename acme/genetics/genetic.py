@@ -127,6 +127,8 @@ def get_best(get_fitness, target_len, optimal_fitness, gene_set, display,
         # Update used strategies, when _get_improvement sends a new
         # improvement.
         used_strategies.append(f)
+        # Return the genes whose fitness is higher or equal the optimal
+        # fitness and thus end the algorithm.
         if not optimal_fitness > improvement.fitness:
             return improvement
 

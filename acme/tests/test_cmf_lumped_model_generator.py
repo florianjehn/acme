@@ -12,12 +12,7 @@ import copy
 import math
 import os
 import acme.model_generators._lookup as lookup
-
-
-# Only import cmf if the test is run on windows, so Travis does not try to
-# import a non existing thing
-if os.name == "nt":
-    import cmf
+import cmf
 
 
 class GeneratorsTests(unittest.TestCase):
@@ -61,40 +56,38 @@ class GeneratorsTests(unittest.TestCase):
 
         :return: None
         """
-        # Exclude from Travis.
-        if os.name == "nt":
-            genes = generator.LumpedCMFGenerator.gene_set
-            precipitation, temperature_avg, temperature_min, \
-            temperature_max, discharge = load_data(
-                "GrebenauQTagMittel__1979_1990.txt",
-                "Temp_max_min_avg_1979_1988.txt",
-                "Prec_Grebenau_1979_1988.txt",
-                2976.41
-            )
-            data = {
-                "prec": precipitation,
-                "discharge": discharge,
-                "t_mean": temperature_avg,
-                "t_min": temperature_min,
-                "t_max": temperature_max
-            }
-            obj_func = "nashsutcliffe"
-            obj_func = lookup.get_obj_func(obj_func)
-            algorithm = "dream"
-            algorithm = lookup.get_algorithm(algorithm)
-            distribution = "Uniform"
-            distribution = lookup.get_distribution(distribution)
-            fitness = generator.get_fitness(genes, data, obj_func, algorithm,
-                                            distribution,
-                                            # start and end dates for
-                                            # calibration and validation
-                                            datetime.datetime(1980, 1, 1),
-                                            datetime.datetime(1981, 12, 31),
-                                            datetime.datetime(1982, 1, 1),
-                                            datetime.datetime(1983, 12, 31))
-            self.assertTrue(fitness > 0)
-        else:
-            pass
+
+        genes = generator.LumpedCMFGenerator.gene_set
+        precipitation, temperature_avg, temperature_min, \
+        temperature_max, discharge = load_data(
+            "GrebenauQTagMittel__1979_1990.txt",
+            "Temp_max_min_avg_1979_1988.txt",
+            "Prec_Grebenau_1979_1988.txt",
+            2976.41
+        )
+        data = {
+            "prec": precipitation,
+            "discharge": discharge,
+            "t_mean": temperature_avg,
+            "t_min": temperature_min,
+            "t_max": temperature_max
+        }
+        obj_func = "nashsutcliffe"
+        obj_func = lookup.get_obj_func(obj_func)
+        algorithm = "dream"
+        algorithm = lookup.get_algorithm(algorithm)
+        distribution = "Uniform"
+        distribution = lookup.get_distribution(distribution)
+        fitness = generator.get_fitness(genes, data, obj_func, algorithm,
+                                        distribution,
+                                        # start and end dates for
+                                        # calibration and validation
+                                        datetime.datetime(1980, 1, 1),
+                                        datetime.datetime(1981, 12, 31),
+                                        datetime.datetime(1982, 1, 1),
+                                        datetime.datetime(1983, 12, 31))
+        self.assertTrue(fitness > 0)
+
 
     def test_display(self):
         """
@@ -327,40 +320,38 @@ def load_data(discharge_file, temperature_file, precipitation_file,
     Loads climata and discharge data from the corresponding files
     discharge_file, temperature_file and precipitation_file
     """
-    # Only run when not on Travis
-    if os.name == "nt":
-        # Fixed model starting point
-        begin = datetime.datetime(1979, 1, 1)
-        step = datetime.timedelta(days=1)
-        # empty time series
-        precipitation = cmf.timeseries(begin, step)
-        with open(precipitation_file) as precipitation_file_file:
-            precipitation.extend(float(precipitation_str) for
-                                 precipitation_str in
-                                 precipitation_file_file)
-        discharge = cmf.timeseries(begin, step)
-        with open(discharge_file) as discharge_file_file:
-            discharge.extend(float(discharge_str) for discharge_str in
-                             discharge_file_file)
-        # Convert m3/s to mm/day
-        discharge *= 86400 * 1e3 / (area_catchment * 1e6)
-        temperature_avg = cmf.timeseries(begin, step)
-        temperature_min = cmf.timeseries(begin, step)
-        temperature_max = cmf.timeseries(begin, step)
 
-        # Go through all lines in the file
-        with open(temperature_file) as temperature_file_file:
-            for line in temperature_file_file:
-                columns = line.split('\t')
-                if len(columns) == 3:
-                    temperature_max.add(float(columns[0]))
-                    temperature_min.add(float(columns[1]))
-                    temperature_avg.add(float(columns[2]))
+    # Fixed model starting point
+    begin = datetime.datetime(1979, 1, 1)
+    step = datetime.timedelta(days=1)
+    # empty time series
+    precipitation = cmf.timeseries(begin, step)
+    with open(precipitation_file) as precipitation_file_file:
+        precipitation.extend(float(precipitation_str) for
+                             precipitation_str in
+                             precipitation_file_file)
+    discharge = cmf.timeseries(begin, step)
+    with open(discharge_file) as discharge_file_file:
+        discharge.extend(float(discharge_str) for discharge_str in
+                         discharge_file_file)
+    # Convert m3/s to mm/day
+    discharge *= 86400 * 1e3 / (area_catchment * 1e6)
+    temperature_avg = cmf.timeseries(begin, step)
+    temperature_min = cmf.timeseries(begin, step)
+    temperature_max = cmf.timeseries(begin, step)
 
-        return precipitation, temperature_avg, temperature_min,\
-            temperature_max, discharge
-    else:
-        pass
+    # Go through all lines in the file
+    with open(temperature_file) as temperature_file_file:
+        for line in temperature_file_file:
+            columns = line.split('\t')
+            if len(columns) == 3:
+                temperature_max.add(float(columns[0]))
+                temperature_min.add(float(columns[1]))
+                temperature_avg.add(float(columns[2]))
+
+    return precipitation, temperature_avg, temperature_min,\
+        temperature_max, discharge
+
 
 if __name__ == '__main__':
     unittest.main()

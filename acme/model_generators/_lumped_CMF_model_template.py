@@ -12,9 +12,7 @@ import datetime
 import os
 import spotpy
 import numpy as np
-# Exclude CMF to allow Travis testing
-if os.name == "nt":
-    import cmf
+import cmf
 
 
 class LumpedModelCMF:
