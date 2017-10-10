@@ -74,6 +74,7 @@ class LumpedCMFGenerator:
 
                  max_age=50,
                  pool_size=10,
+                 max_seconds=None,
                  search_iterations=1,
                  obj_func_increment=0.1
                  ):
@@ -126,6 +127,7 @@ class LumpedCMFGenerator:
         self.pool_size = pool_size
         self.search_iterations = search_iterations
         self.obj_func_increment = obj_func_increment
+        self.max_seconds = max_seconds
 
     def solve(self):
         """
@@ -165,10 +167,8 @@ class LumpedCMFGenerator:
         def fn_crossover(parent, donor):
             return crossover(parent, donor)
 
+        # Save the starting time
         start_time = datetime.datetime.now()
-
-
-        # Todo: Include max time from genetics book
 
         # Give all definitions to the get_best function of genetic to start
         # the whole process of evolutionary selection
@@ -176,7 +176,8 @@ class LumpedCMFGenerator:
                                 None, fn_display, fn_mutate, fn_create,
                                 max_age=self.max_age,
                                 pool_size=self.pool_size,
-                                crossover=fn_crossover)
+                                crossover=fn_crossover,
+                                max_seconds=self.max_seconds)
 
         # At this place it might be handy to nest the while loop into a
         # for loop. The for loop starts with a value for the objective
@@ -216,34 +217,33 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
     :param end_calibration:
     :param begin_validation:
     :param end_validation:
-    :return: Highest fitness value
+    :return: Fitness value
     """
     # Check if the model to be generated is able to connect to an output
     check_for_connection(genes)
 
     # Make a copy of the genes, so the original remains intact and delete
-    # all unneccseary genes in the copy. This way the usage of the template
-    # is easiert.
-    genes_copy = del_params_without_storage(genes)
+    # all unnecessary genes in the copy. This way the usage of the template
+    # is easier.
+    genes_copy = copy.deepcopy(genes)
+    effective_structure = find_effective_structure(genes_copy)
 
     # Compare if the genes the function gets, have already been calculated
     #  as a model
-    # TODO: First check if a model with the current genes has already be
-    # TODO: calculated. If so, return the fitness value of the model.
-    # TODO: If not determine the effective structure and check if the
-    # TODO: effective structure has already been used. If so save the
-    # TODO: original structure with the same fitness value as the already
-    # TODO: calculated effective structure.
     for old_model in LumpedCMFGenerator.models_so_far.keys():
+        # Find the effective structure
         # Turn model in list version
         old_model_genes = old_model.split()
-        # If so, simply return the fitness value of the old model
+        # Find out if the model has already been calculated. If so, simply
+        # return the fitness value of the old model
         if set(old_model_genes) == set(genes):
+            return LumpedCMFGenerator.models_so_far[old_model]
+        if set(old_model_genes) == set(effective_structure):
             return LumpedCMFGenerator.models_so_far[old_model]
 
     # If not call the template and run the model
-    current_model = template.LumpedModelCMF(genes_copy, data, obj_func,
-                                            distribution,
+    current_model = template.LumpedModelCMF(effective_structure, data,
+                                            obj_func, distribution,
                                             begin_calibration, end_calibration,
                                             begin_validation, end_validation)
 
@@ -251,12 +251,6 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
     parallel = 'mpi' if 'OMPI_COMM_WORLD_SIZE' in os.environ else 'seq'
 
     sampler = algorithm(current_model, parallel=parallel, dbformat="noData")
-
-    # Todo: Hier noch irgendwie einbauen das die hydrological signatures
-    # zuerst geteteset werden und ein niedriger Fitnesswert vergeben wird,
-    # wenn das Modell schlecht ist.
-    # Oder muss das in das Template?
-
 
     # The template runs until the predefined convergence value of dream is
     # reached (or the maximal value for repetitions is reached).
