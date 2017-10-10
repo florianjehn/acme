@@ -9,7 +9,6 @@ the interface to spotpy.
 """
 
 import datetime
-import os
 import spotpy
 import numpy as np
 import cmf
@@ -164,8 +163,6 @@ class LumpedModelCMF:
             if "beta_river_out" in genes:
                 params.append(distribution("beta_river_out", 0., 4.))
 
-
-
         # All layers, but not the river exis
         elif second_layer and third_layer and not river:
             pass
@@ -193,9 +190,7 @@ class LumpedModelCMF:
 
         # Add
 
-
         return params
-
 
     def setparameters(self, **kwargs):
         """
@@ -226,7 +221,6 @@ class LumpedModelCMF:
 
         def only_third_layer():
             pass
-
 
     def make_stations(self, prec, temp, temp_min, temp_max):
         """

@@ -338,9 +338,14 @@ def display(candidate, start_time):
     :return: None
     """
     time_diff = datetime.datetime.now() - start_time
-    print("Genes: {}\t\nFitness: {}\tStrategy: {}\tTime: {}".format(
-        " ".join(map(str, candidate.genes)),
-        candidate.fitness, candidate.Strategy.name, time_diff))
+    # calculate how much % of the genes are active
+    active_genes = find_effective_structure(candidate.genes)
+    activity = len(active_genes) / len(candidate.genes) * 100
+    print(("Genes: {}\t\nGene Activity: {} % \t\nFitness: {}\tStrategy: {}\t"
+           "Time: {}".format(
+                            " ".join(map(str, candidate.genes)), activity,
+                            candidate.fitness, candidate.Strategy.name,
+                            time_diff)))
 
 
 def mutate(genes, gene_set):
