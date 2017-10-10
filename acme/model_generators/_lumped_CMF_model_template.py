@@ -16,7 +16,7 @@ import cmf
 
 
 class LumpedModelCMF:
-    def __init__(self, genes, data, obj_func, distribution,
+    def __init__(self, genes, data,
                  begin_calibration, end_calibration,
                  begin_validation, end_validation):
         """
@@ -24,20 +24,14 @@ class LumpedModelCMF:
 
         :param genes:
         :param data:
-        :param obj_func:
-        :param distribution:
         :param begin_calibration:
         :param end_calibration:
         :param begin_validation:
         :param end_validation:
-        :param possible_params: A dictionary with all possible different
-        params for this model and what storage they are related too
         """
         # Main things
-        self.obj_func = obj_func
         self.genes = genes
         self.data = data
-        self.distribution = distribution
 
         # Date stuff
         self.begin_calibration = begin_calibration
@@ -46,8 +40,7 @@ class LumpedModelCMF:
         self.end_validation = end_validation
 
         # Create params list
-        self.params = self.create_params_from_genes(self.genes,
-                                                    self.distribution)
+        self.params = self.create_params_from_genes(self.genes)
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -103,13 +96,14 @@ class LumpedModelCMF:
             c.add_storage("river", "r")
 
     @staticmethod
-    def create_params_from_genes(genes, distribution):
+    def create_params_from_genes(genes):
         """
         Creates the param list, which is needed for SPOTPY. It is static
         so it can be tested without creating an template instance.
         :return: params list
         """
         params = []
+        distribution = spotpy.parameter.Uniform
         # ET Params always included
         # ETV1 = Under this volume the potential ET is reduced by the factor
         # fETV0
@@ -308,6 +302,5 @@ class LumpedModelCMF:
         For Spotpy. Tells Spotpy how the model is to be evaluated.
         """
         # Todo: Hier noch hydrological signatures?
-        # Todo: Hier immer Kling Gupta?
-        # Todo: Wie lösen, dass DREAM bestimmte obj_func brauch?
-        return self.objective_function(evaluation, simulation)
+        return spotpy.likelihoods.gaussianLikelihoodMeasErrorOut(evaluation,
+                                                                 simulation)

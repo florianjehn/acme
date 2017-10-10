@@ -17,6 +17,7 @@ import datetime
 import random
 import os
 import copy
+import spotpy
 
 
 class LumpedCMFGenerator:
@@ -60,11 +61,7 @@ class LumpedCMFGenerator:
                  begin_validation,
                  end_validation,
 
-                 obj_func,
                  optimal_fitness,
-                 distribution,
-                 algorithm,
-                 et,
 
                  prec,
                  discharge,
@@ -85,11 +82,7 @@ class LumpedCMFGenerator:
         :param end_calibration:
         :param begin_validation:
         :param end_validation:
-        :param obj_func:
         :param optimal_fitness:
-        :param distribution:
-        :param algorithm:
-        :param et:
         :param prec:
         :param discharge:
         :param t_mean:
@@ -108,11 +101,7 @@ class LumpedCMFGenerator:
         self.end_validation = end_validation
 
         # Get the functions and classes the match the user specified inputs.
-        self.obj_func = lookup.get_obj_func(obj_func)
         self.optimal_fitness = optimal_fitness
-        self.distribution = lookup.get_distribution(distribution)
-        self.algorithm = lookup.get_algorithm(algorithm)
-        self.et = lookup.get_evapotranspiration(et)
 
         # Forcing data
         self.data = {
@@ -139,9 +128,6 @@ class LumpedCMFGenerator:
         """
         # Make the needed variables available for the helper functions.
         data = self.data
-        obj_func = self.obj_func
-        algorithm = self.algorithm
-        distribution = self.distribution
         # Calibration/Validation stuff
         begin_calibration = self.begin_calibration
         end_calibration = self.end_calibration
@@ -157,7 +143,7 @@ class LumpedCMFGenerator:
             display(candidate, start_time)
 
         def fn_get_fitness(genes):
-            return get_fitness(genes, data, obj_func, algorithm, distribution,
+            return get_fitness(genes, data,
                                begin_calibration, end_calibration,
                                begin_validation, end_validation)
 
@@ -201,7 +187,7 @@ class LumpedCMFGenerator:
         write_all_models()
 
 
-def get_fitness(genes, data, obj_func, algorithm, distribution,
+def get_fitness(genes, data,
                 begin_calibration, end_calibration,
                 begin_validation, end_validation):
     """
@@ -209,10 +195,6 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
 
     :param genes: genotype that is to be tested for its fitness
     :param data: the weather data in the form of a dict of lists
-    :param obj_func: the objective function that is to be used.
-    :param algorithm: The sampling algorithm form Spotpy. For now the use of
-                      dream is assumed.
-    :param distribution:
     :param begin_calibration:
     :param end_calibration:
     :param begin_validation:
@@ -222,11 +204,8 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
     # Check if the model to be generated is able to connect to an output
     check_for_connection(genes)
 
-    # Make a copy of the genes, so the original remains intact and delete
-    # all unnecessary genes in the copy. This way the usage of the template
-    # is easier.
-    genes_copy = copy.deepcopy(genes)
-    effective_structure = find_effective_structure(genes_copy)
+    # Find the effective structure of the current genes
+    effective_structure = find_effective_structure(genes)
 
     # Compare if the genes the function gets, have already been calculated
     #  as a model
@@ -243,14 +222,15 @@ def get_fitness(genes, data, obj_func, algorithm, distribution,
 
     # If not call the template and run the model
     current_model = template.LumpedModelCMF(effective_structure, data,
-                                            obj_func, distribution,
                                             begin_calibration, end_calibration,
                                             begin_validation, end_validation)
 
     # Find out if the model should run parallel (for supercomputer)
     parallel = 'mpi' if 'OMPI_COMM_WORLD_SIZE' in os.environ else 'seq'
 
-    sampler = algorithm(current_model, parallel=parallel, dbformat="noData")
+    # Connect the model to the dream algorithm.
+    sampler = spotpy.algorithms.dream(current_model, parallel=parallel,
+                                      dbformat="noData")
 
     # The template runs until the predefined convergence value of dream is
     # reached (or the maximal value for repetitions is reached).
