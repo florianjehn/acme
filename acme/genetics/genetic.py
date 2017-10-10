@@ -27,6 +27,7 @@ import random
 from bisect import bisect_left
 from math import exp
 from enum import Enum
+import time
 
 
 class Chromosome:
@@ -55,7 +56,7 @@ class Strategies(Enum):
 
 def get_best(get_fitness, target_len, optimal_fitness, gene_set, display,
              custom_mutate=None, custom_create=None, max_age=None,
-             pool_size=1, crossover=None):
+             pool_size=1, crossover=None, max_seconds=None):
     """
     Reusable genetic engine to find the best solution for a given fitness.
     Responsible for displaying improvements and breaking the loop.
@@ -73,6 +74,7 @@ def get_best(get_fitness, target_len, optimal_fitness, gene_set, display,
     :param pool_size: amount of parents (in crossover)
     :param crossover: Function which defines how the crossover should
     happen. Is not directly implemented here, as it is very project specific
+    :param max_seconds: Maximum time before timeout
     :return: The best found solution
     """
     # Switch between different mutating behaviours
@@ -120,8 +122,14 @@ def get_best(get_fitness, target_len, optimal_fitness, gene_set, display,
             return fn_mutate(parent)
 
     # _get_improvement is used as a kind of generator here.
-    for improvement in _get_improvement(fn_new_child, fn_generate_parent,
-                                        max_age, pool_size):
+    for timed_out, improvement in _get_improvement(fn_new_child,
+                                                   fn_generate_parent,
+                                                   max_age, pool_size,
+                                                   max_seconds):
+        # If the maximal time is used up, the best improvement so far is
+        # returned
+        if timed_out:
+            return improvement
         display(improvement)
         f = strategy_lookup[improvement.Strategy]
         # Update used strategies, when _get_improvement sends a new
@@ -133,7 +141,8 @@ def get_best(get_fitness, target_len, optimal_fitness, gene_set, display,
             return improvement
 
 
-def _get_improvement(new_child, generate_parent, max_age, pool_size):
+def _get_improvement(new_child, generate_parent, max_age, pool_size,
+                     max_seconds):
     """
     Responsible for generating successively better gene sequences,
     which will be send back with yield.
@@ -143,11 +152,16 @@ def _get_improvement(new_child, generate_parent, max_age, pool_size):
     :param max_age: Maximum age a genotype can reach before its replace.
     Needed for simulated annealing.
     :param pool_size: Amount of parents, for crossover
+    :param max_seconds: Maximum time before timeout
     :return: Chromosome object of improved genotype
     """
-    # Generate a parent and return it
+    # Start a timer to know when the maximal time is reached.
+    start_time = time.time()
+    # Generate a parent and return it. Also check if the maximal time is
+    # reached.
     best_parent = generate_parent()
-    yield best_parent
+    yield max_seconds is not None and time.time() - start_time > \
+          max_seconds, best_parent
     # Add best_parent to the parents pool
     parents = [best_parent]
     # keep the historical fitnesses for later possible comparisons
@@ -155,10 +169,13 @@ def _get_improvement(new_child, generate_parent, max_age, pool_size):
     # Fill the parents pool
     for _ in range(pool_size - 1):
         parent = generate_parent()
+        # Check is the maximal time is reached
+        if max_seconds is not None and time.time() - start_time > max_seconds:
+            yield True, parent
         # If one newly generated parent has a higher fitness, then the best
         # parent so far replace him and update historical fitnesses.
         if parent.fitness > best_parent.fitness:
-            yield parent
+            yield False, parent
             best_parent = parent
             historical_fitnesses.append(parent.fitness)
         parents.append(parent)
@@ -170,6 +187,9 @@ def _get_improvement(new_child, generate_parent, max_age, pool_size):
     last_parent_index = pool_size - 1
     p_index = 1
     while True:
+        # check if the maximal time is reached.
+        if max_seconds is not None and time.time() - start_time > max_seconds:
+            yield True, best_parent
         p_index = p_index - 1 if p_index > 0 else last_parent_index
         parent = parents[p_index]
         child = new_child(parent, p_index, parents)
@@ -211,7 +231,9 @@ def _get_improvement(new_child, generate_parent, max_age, pool_size):
         parent.age = 0
         # Return the child if it better than the best parent so far.
         if child.fitness > best_parent.fitness:
-            yield child
+            # Here False can be returned as default, as we have already
+            # check when we find a new best parent.
+            yield False, child
             best_parent = child
             historical_fitnesses.append(child.fitness)
 

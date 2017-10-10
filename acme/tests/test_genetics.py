@@ -67,7 +67,7 @@ class GeneticTests(unittest.TestCase):
         best = genetic.get_best(fn_get_fitness, None, optimal_fitness, None,
                                 fn_display, fn_mutate, fn_create,
                                 max_age=500, pool_size=25,
-                                crossover=fn_crossover)
+                                crossover=fn_crossover, max_seconds=None)
         self.assertTrue(not optimal_fitness > best.fitness)
 
 
