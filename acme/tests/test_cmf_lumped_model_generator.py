@@ -295,22 +295,6 @@ class GeneratorsTests(unittest.TestCase):
         """
         pass
 
-    def test_split_param_names(self):
-        """
-        Tests if split_param_names splits the names correctly.
-
-        :return: None
-        """
-        name = ["tr_first_out"]
-        split = generator.split_param_names(name)
-        self.assertTrue(len(split) == 3
-                        and
-                        split[0] == "tr"
-                        and
-                        split[1] == "first"
-                        and
-                        split[2] == "out")
-
 
 def load_data(discharge_file, temperature_file, precipitation_file,
               area_catchment):

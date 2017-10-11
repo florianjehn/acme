@@ -315,17 +315,6 @@ def del_inactive_storages(genes):
     return genes
 
 
-def split_param_names(name):
-    """
-    Split a parameter names into the name itself and the source,
-    and target respectively.
-
-    :param names:
-    :return: Split name as List [name, source, target]
-    """
-    pass
-
-
 def display(candidate, start_time):
     """
     Display the current candidate and his fitness.
