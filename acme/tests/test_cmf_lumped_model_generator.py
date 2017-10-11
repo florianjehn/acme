@@ -278,10 +278,15 @@ class GeneratorsTests(unittest.TestCase):
 
     def test_del_inactive_params(self):
         """
+        Tests if inactive params are deleted correctly.
 
-        :return:
+        :return: None
         """
-        pass
+        genes = ["tr_first_out", "tr_second_out", "beta_first_out"]
+        genes = generator.del_inactive_params(genes)
+        print(genes)
+        self.assertTrue(set(genes) == {"tr_first_out", "beta_first_out"})
+
 
     def test_del_inactive_storages(self):
         """
@@ -289,11 +294,11 @@ class GeneratorsTests(unittest.TestCase):
 
         :return: None
         """
-        genes = ["tr_first_out", "tr_second_out", "beta_first_out", "third"]
-        genes_copy = copy.deepcopy(genes)
-        genes_copy = generator.del_inactive_storages(genes_copy)
-        self.assertTrue(set(genes_copy) == {"tr_first_out", "tr_second_out",
-                                            "beta_first_out"})
+        genes = ["tr_first_out", "tr_second_out", "beta_first_out", "third",
+                                                                    "second"]
+        genes = generator.del_inactive_storages(genes)
+        self.assertTrue(set(genes) == {"tr_first_out", "tr_second_out",
+                                       "beta_first_out"})
 
 
 

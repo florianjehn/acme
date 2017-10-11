@@ -254,6 +254,8 @@ def find_active_genes(genes):
     """
     # Make a copy, so the original remains unchanged
     genes_copy = copy.deepcopy(genes)
+    # Add the first layer to not delete the genes from there as default
+    genes_copy += "first"
     # Delete all inactive stuff
     genes_copy = del_inactive_storages(genes_copy)
     genes_copy = del_inactive_params(genes_copy)
@@ -314,7 +316,7 @@ def del_inactive_params(genes):
     # not all deleted by default.
     # Determine which storages are present in the genes
     possible_storages = LumpedCMFGenerator.storages + ["first"]
-    actual_storages = []
+    actual_storages = ["first"]
     for possible_storage in possible_storages:
         for gene in genes:
             if possible_storage == gene:
