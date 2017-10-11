@@ -37,8 +37,6 @@ class LumpedCMFGenerator:
                    "tr_third_river"]
     snow_params = ["snow_meltrate", "snow_melt_temp"]
     canopy_params = ["canopy_lai", "canopy_closure"]
-    # ET params excluded as a ETact that is always ETpot makes no sense
-    # et_params = ["etv0", "fetv0"]
     first_layer_params = ["beta_first_out", "beta_first_river",
                           "beta_first_second", "v0_first_out",
                           "v0_first_river", "v0_first_second"]
@@ -46,13 +44,12 @@ class LumpedCMFGenerator:
     third_layer_params = ["beta_third_river"]
     river_params = ["beta_river_out"]
     params = (snow_params + canopy_params +
-              # et_params +
               first_layer_params +
               second_layer_params + third_layer_params +
               river_params)
     gene_set = storages + connections + params
 
-    # List to save all models that have been tested so far. The key is
+    # Dictionary to save all models that have been tested so far. The key is
     # the genes in the model and the value the best objective function value.
     models_so_far = {}
 
@@ -90,6 +87,7 @@ class LumpedCMFGenerator:
         :param t_max:
         :param max_age:
         :param pool_size:
+        :param max_seconds:
         :param search_iterations:
         :param obj_func_increment:
         """
@@ -254,23 +252,23 @@ def find_effective_structure(genes):
     :param genes: Current genes
     :return: Copy of current genes, with only the active genes in it.
     """
-    # Make a copy, so the original
+    # Make a copy, so the original remains unchanged
     genes_copy = copy.deepcopy(genes)
     # Delete all inactive stuff
-    genes_copy = del_params_without_storage(genes_copy)
-    genes_copy = del_params_without_connection(genes_copy)
+    genes_copy = del_inactive_connections(genes_copy)
     genes_copy = del_inactive_storages(genes_copy)
+    genes_copy = del_inactive_params(genes_copy)
 
     return genes_copy
 
 
-def del_params_without_storage(genes):
+def del_inactive_params(genes):
     """
     Deletes all parameters which do not have their storage present in the
     current genes
 
     :param genes: Current genes
-    :return: Copy with of the current genes, with all
+    :return: Copy with of the current genes, with all inactive params deleted
     """
 
     # Add the first layer to the copy, so the connections  from first are
@@ -297,13 +295,12 @@ def del_params_without_storage(genes):
     return genes
 
 
-def del_params_without_connection(genes):
+def del_inactive_connections(genes):
     """
-    Deletes all parameters which do not have their connection present in the
-    current genes.
+    Deletes all connections which do not have their storages present.
 
     :param genes: Current genes
-    :return: Copy of current genes, with only the active genes in it.
+    :return: Copy of the current genes, with all inactive connections deleted
     """
     return genes
 
@@ -318,13 +315,13 @@ def del_inactive_storages(genes):
     return genes
 
 
-def split_param_names(names):
+def split_param_names(name):
     """
-    Splits a bunch of parameter names into the name itself and the source,
+    Split a parameter names into the name itself and the source,
     and target respectively.
 
     :param names:
-    :return: Splitted names
+    :return: Split name as List [name, source, target]
     """
     pass
 
@@ -519,7 +516,8 @@ def write_all_models():
     :return: None
     """
     # Open the output file
-    outfile = open('acme_results.csv', 'w')
+    outfile = open('acme_results_' + str(datetime.datetime.now()) + '.csv',
+                   'w')
 
     # Make the header
     header = "Like" + ", " + "Genes" + "\n"

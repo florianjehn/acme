@@ -78,8 +78,7 @@ class GeneratorsTests(unittest.TestCase):
         algorithm = lookup.get_algorithm(algorithm)
         distribution = "Uniform"
         distribution = lookup.get_distribution(distribution)
-        fitness = generator.get_fitness(genes, data, obj_func, algorithm,
-                                        distribution,
+        fitness = generator.get_fitness(genes, data,
                                         # start and end dates for
                                         # calibration and validation
                                         datetime.datetime(1980, 1, 1),
@@ -203,8 +202,7 @@ class GeneratorsTests(unittest.TestCase):
         """
         genes = generator.LumpedCMFGenerator.gene_set
         params = (template.LumpedModelCMF.
-                  create_params_from_genes(genes, lookup.get_distribution(
-                                                                 "Uniform")))
+                  create_params_from_genes(genes))
 
         params_names = []
         for param in params:
@@ -290,7 +288,6 @@ class GeneratorsTests(unittest.TestCase):
         """
         pass
 
-
     def test_del_inactive_storages(self):
         """
 
@@ -298,20 +295,21 @@ class GeneratorsTests(unittest.TestCase):
         """
         pass
 
-
     def test_split_param_names(self):
         """
         Tests if split_param_names splits the names correctly.
 
         :return: None
         """
-        names = ["tr_first_out", "tr_second_river", "tr_third_river"]
-        splitted = generator.split_param_names(names)
-        self.assertTrue(len(splitted) == 3
+        name = ["tr_first_out"]
+        split = generator.split_param_names(name)
+        self.assertTrue(len(split) == 3
                         and
-                        len(splitted[0]) == 3
+                        split[0] == "tr"
                         and
-                        splitted[1][1] == "second")
+                        split[1] == "first"
+                        and
+                        split[2] == "out")
 
 
 def load_data(discharge_file, temperature_file, precipitation_file,
