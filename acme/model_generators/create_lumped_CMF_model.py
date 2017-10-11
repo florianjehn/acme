@@ -203,7 +203,7 @@ def get_fitness(genes, data,
     check_for_connection(genes)
 
     # Find the effective structure of the current genes
-    effective_structure = find_effective_structure(genes)
+    effective_structure = find_active_genes(genes)
 
     # Compare if the genes the function gets, have already been calculated
     #  as a model
@@ -245,7 +245,7 @@ def get_fitness(genes, data,
     return best_like
 
 
-def find_effective_structure(genes):
+def find_active_genes(genes):
     """
     Calls all other methods which strip the genes to only the active ones.
 
@@ -255,11 +255,50 @@ def find_effective_structure(genes):
     # Make a copy, so the original remains unchanged
     genes_copy = copy.deepcopy(genes)
     # Delete all inactive stuff
-    genes_copy = del_inactive_connections(genes_copy)
     genes_copy = del_inactive_storages(genes_copy)
     genes_copy = del_inactive_params(genes_copy)
 
     return genes_copy
+
+
+def del_inactive_storages(genes):
+    """
+    Deletes all storages, which have no inflow from any source.
+
+    :param genes: Current genes
+    :return: Current genes, with all inactive storages deleted
+    """
+    # Find all connection genes
+    connections = []
+    for gene in genes:
+        if "tr" in gene:
+            connections.append(gene)
+
+    # Cycle through all connection genes and split them in sources and targets
+    sources = []
+    targets = []
+    for connection in connections:
+        name, source, target = connection.split("_")
+        sources.append(source)
+        targets.append(target)
+
+    # Determine which storages are present in the genes
+    possible_storages = LumpedCMFGenerator.storages
+    actual_storages = []
+    for possible_storage in possible_storages:
+        for gene in genes:
+            if possible_storage == gene:
+                actual_storages.append(gene)
+
+    # Look if storage is in source and target
+    # If not, delete storage
+    for storage in actual_storages:
+        if storage in targets and storage in sources:
+            continue
+        else:
+            genes.remove(storage)
+
+    return genes
 
 
 def del_inactive_params(genes):
@@ -268,7 +307,7 @@ def del_inactive_params(genes):
     current genes
 
     :param genes: Current genes
-    :return: Copy with of the current genes, with all inactive params deleted
+    :return: Current genes, with all inactive params deleted
     """
 
     # Add the first layer to the copy, so the connections  from first are
@@ -292,26 +331,6 @@ def del_inactive_params(genes):
         if not storage_present:
             genes.remove(gene)
 
-    return genes
-
-
-def del_inactive_connections(genes):
-    """
-    Deletes all connections which do not have their storages present.
-
-    :param genes: Current genes
-    :return: Copy of the current genes, with all inactive connections deleted
-    """
-    return genes
-
-
-def del_inactive_storages(genes):
-    """
-    Deletes all storages, which have no inflow from any source.
-
-    :param genes:
-    :return:
-    """
     return genes
 
 
