@@ -72,12 +72,7 @@ class GeneratorsTests(unittest.TestCase):
             "t_min": temperature_min,
             "t_max": temperature_max
         }
-        obj_func = "nashsutcliffe"
-        obj_func = lookup.get_obj_func(obj_func)
-        algorithm = "dream"
-        algorithm = lookup.get_algorithm(algorithm)
-        distribution = "Uniform"
-        distribution = lookup.get_distribution(distribution)
+
         fitness = generator.get_fitness(genes, data,
                                         # start and end dates for
                                         # calibration and validation
@@ -244,7 +239,7 @@ class GeneratorsTests(unittest.TestCase):
         """
         genes = ["snow", "snow_meltrate", "tr_first_out", "first",
                  "tr_second_out"]
-        genes_copy = generator.del_params_without_storage(genes)
+        genes_copy = generator.del_inactive_params(genes)
 
         # From this test set tr_second_out should be deleted. All other
         # connections should remain.
@@ -281,7 +276,7 @@ class GeneratorsTests(unittest.TestCase):
         del models_so_far[model_1_str]
         del models_so_far[model_2_str]
 
-    def test_del_params_without_connections(self):
+    def test_del_inactive_params(self):
         """
 
         :return:
@@ -290,10 +285,16 @@ class GeneratorsTests(unittest.TestCase):
 
     def test_del_inactive_storages(self):
         """
+        Tests if incative storages are deleted correctly.
 
-        :return:
+        :return: None
         """
-        pass
+        genes = ["tr_first_out", "tr_second_out", "beta_first_out", "third"]
+        genes_copy = copy.deepcopy(genes)
+        genes_copy = generator.del_inactive_storages(genes_copy)
+        self.assertTrue(set(genes_copy) == {"tr_first_out", "tr_second_out",
+                                            "beta_first_out"})
+
 
 
 def load_data(discharge_file, temperature_file, precipitation_file,

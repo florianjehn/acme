@@ -11,13 +11,13 @@ The structure is created in such a way, that there is always at least one
 connection to the outlet.
 """
 import acme.model_generators._lumped_CMF_model_template as template
-import acme.model_generators._lookup as lookup
 import acme.genetics.genetic as genetic
 import datetime
 import random
 import os
 import copy
 import spotpy
+import time
 
 
 class LumpedCMFGenerator:
@@ -344,7 +344,7 @@ def display(candidate, start_time):
     """
     time_diff = datetime.datetime.now() - start_time
     # calculate how much % of the genes are active
-    active_genes = find_effective_structure(candidate.genes)
+    active_genes = find_active_genes(candidate.genes)
     activity = len(active_genes) / len(candidate.genes) * 100
     print(("Genes: {}\t\nGene Activity: {} % \t\nFitness: {}\tStrategy: {}\t"
            "Time: {}".format(
@@ -524,8 +524,8 @@ def write_all_models():
     :return: None
     """
     # Open the output file
-    outfile = open('acme_results_' + str(datetime.datetime.now()) + '.csv',
-                   'w')
+    name = 'acme_results_' + str(time.time()) + '.csv'
+    outfile = open(name, 'w')
 
     # Make the header
     header = "Like" + ", " + "Genes" + "\n"
@@ -535,7 +535,7 @@ def write_all_models():
     for genes, like in LumpedCMFGenerator.models_so_far.items():
         # Exclude the non active genes before writing it down
         genes_copy = genes.split()
-        genes_copy = del_params_without_storage(genes_copy)
+        genes_copy = find_active_genes(genes_copy)
         genes_copy = ", ".join(genes_copy)
         line = str(like) + ", " + genes_copy + "\n"
         outfile.write(line)
