@@ -36,9 +36,9 @@ To be able to use it properly you need SPOTPY and CMF as well:
 ## Getting started (and beyond)
 You can either use only the genetic engine itself to define the way you want your CMF model to be created or you can use one of the predefined CMF-model-generators.
 
-[Klick me to go to the examples](https://github.com/zutn/ACME/tree/master/acme/examples)
+[Klick me to go to the examples](https://github.com/zutn/ACME/tree/master/acme/examples) (not yet implemented)
 
-If you are interested in how ACME handels the genetic algorithm a look in the [tests](https://github.com/zutn/ACME/tree/master/acme/tests) might be useful. The original algorithm is from [Clinton Sheppard](https://github.com/handcraftsman) in his book [Genetic algorithms with Python](https://leanpub.com/genetic_algorithms_with_python).
+If you are interested in how ACME handles the genetic algorithm a look in the [tests](https://github.com/zutn/ACME/tree/master/acme/tests) might be useful. The original algorithm was devised by [Clinton Sheppard](https://github.com/handcraftsman) in his book [Genetic algorithms with Python](https://leanpub.com/genetic_algorithms_with_python).
 
 Or if you are up to a bit larger challenge it is also possible to rewrite the code provided here to work with different model frameworks (e.g. [FUSE](http://onlinelibrary.wiley.com/doi/10.1029/2007WR006735/abstract)). This might be a bit of work especially if the framework is not written in Python, but well worth a try. Feel free to contact me if you want to undertake this journey. 
 
@@ -46,7 +46,7 @@ Or if you are up to a bit larger challenge it is also possible to rewrite the co
 This program assumes you have an up to date [SPOTPY](http://fb09-pasig.umwelt.uni-giessen.de/spotpy/) package installed. If you want to create [CMF](http://fb09-pasig.umwelt.uni-giessen.de/cmf) models you also need an up to date CMF version. SPOTPY can be installed with pip. To get CMF you have to follow the instructions [here](http://fb09-pasig.umwelt.uni-giessen.de/cmf/wiki/CmfInstall).
 
 ## License
-This project is released unter the Apache 2 license. If you are wondering what this means, here is a short explanation:
+This project is released under the Apache 2 license. If you are wondering what this means, here is a short explanation:
 
 "The Apache license says “do whatever you want with this, just don’t sue me” but does so with many more words, which lawyers like because it adds specificity. It also contains a patent license and retaliation clause which is designed to prevent patents (including patent trolls) from encumbering the software project." 
 
