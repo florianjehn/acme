@@ -519,10 +519,12 @@ def create(test=False):
     return genes
 
 
-def write_all_models():
+def write_all_models(test=False):
     """
     Writes all the models to a file.
 
+    :param: test: Determines if the function is called in test mode,
+    which enables the deletion of the file at the end.
     :return: None
     """
     # Open the output file
@@ -542,6 +544,10 @@ def write_all_models():
         line = str(like) + ", " + genes_copy + "\n"
         outfile.write(line)
     outfile.close()
+
+    # Remove the file when only a test is run
+    if test:
+        os.remove(name)
 
 
 def check_for_connection(genes):

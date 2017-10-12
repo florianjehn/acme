@@ -231,7 +231,7 @@ class GeneratorsTests(unittest.TestCase):
                   "{}".format(set(self.gene_set) - set(genes)))
             self.assertTrue(False)
 
-    def test_del_params_without_storage(self):
+    def test_del_inactive_params(self):
         """
         Tests if only the inactive genes are deleted.
 
@@ -271,7 +271,7 @@ class GeneratorsTests(unittest.TestCase):
         models_so_far = generator.LumpedCMFGenerator.models_so_far
         models_so_far[model_1_str] = model_1_like
         models_so_far[model_2_str] = model_2_like
-        generator.write_all_models()
+        generator.write_all_models(test=True)
         # Delete them again, to not cause trouble when the program itself runs
         del models_so_far[model_1_str]
         del models_so_far[model_2_str]
