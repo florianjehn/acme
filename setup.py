@@ -33,7 +33,7 @@ setup(
   url='https://github.com/zutn/ACME',
   license='Apache-2.0',
   packages=["acme", "acme.examples", "acme.genetics",
-            "acme.model_generators", "acme.visualization"],
+            "acme.model_generators", "acme.visualization", "acme.test"],
   include_package_data=True,
   keywords=['Evolution', 'lumped models', 'Genetic Algorithms', 'Hydrology',
             'Simulated Annealing', 'CMF', 'ROPE', 'Uncertainty',
@@ -45,7 +45,6 @@ setup(
         'License :: OSI Approved :: Apache-2.0 License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries :: Python Modules'],)
