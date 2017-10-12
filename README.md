@@ -38,6 +38,8 @@ You can either use only the genetic engine itself to define the way you want you
 
 [Klick me to go to the examples](https://github.com/zutn/ACME/tree/master/acme/examples)
 
+If you are interested in how ACME handels the genetic algorithm a look in the [tests](https://github.com/zutn/ACME/tree/master/acme/tests) might be useful. The original algorithm is from [Clinton Sheppard](https://github.com/handcraftsman) in his book [Genetic algorithms with Python](https://leanpub.com/genetic_algorithms_with_python).
+
 Or if you are up to a bit larger challenge it is also possible to rewrite the code provided here to work with different model frameworks (e.g. [FUSE](http://onlinelibrary.wiley.com/doi/10.1029/2007WR006735/abstract)). This might be a bit of work especially if the framework is not written in Python, but well worth a try. Feel free to contact me if you want to undertake this journey. 
 
 ## Important Dependencies
