@@ -8,11 +8,9 @@ from acme.model_generators import create_lumped_CMF_model as generator
 from acme.model_generators import _lumped_CMF_model_template as template
 import acme.genetics as genetics
 import datetime
-import copy
 import math
-import os
-import acme.model_generators._lookup as lookup
 import cmf
+import pickle
 
 
 class GeneratorsTests(unittest.TestCase):
@@ -366,7 +364,6 @@ def load_data(discharge_file, temperature_file, precipitation_file,
 
     return precipitation, temperature_avg, temperature_min,\
         temperature_max, discharge
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -21,12 +21,12 @@ class LumpedModelCMF:
         """
         Sets up the base model in regard to the genes provided.
 
-        :param genes:
-        :param data:
-        :param begin_calibration:
-        :param end_calibration:
-        :param begin_validation:
-        :param end_validation:
+        :param genes: active genome that is to be tested
+        :param data: dictionary of all data needed for a run
+        :param begin_calibration: start date of the calibration period
+        :param end_calibration: end date of the calibration period
+        :param begin_validation: start date of the validation period
+        :param end_validation: end date of the validation period
         """
         # Main things
         self.genes = genes
@@ -45,54 +45,54 @@ class LumpedModelCMF:
 
         # Basic Layout, same for all possible models
         prec = data["prec"]
-        discharge = data["discharge"]
+        obs_discharge = data["discharge"]
         t_mean = data["t_mean"]
         t_min = data["t_min"]
         t_max = data["t_max"]
-        self.discharge = discharge
+        self.obs_discharge = obs_discharge
 
         # Use only one core (quicker for smaller models)
         cmf.set_parallel_threads(1)
 
         # Generate a project with one cell for a lumped model
         self.project = cmf.project()
-        p = self.project
+        project = self.project
 
         # Add one cell, which will include all other parts. The area is set
         # to 1000 m², so the units are easier to understand
-        c = p.NewCell(0, 0, 0, 1000)
+        cell = project.NewCell(0, 0, 0, 1000)
 
         # Add a first layer, this one is always present, as a model with no
         # layers makes no sense
-        first_layer = c.add_layer(2.0)
+        first_layer = cell.add_layer(2.0)
 
         # Add an evapotranspiration
-        cmf.HargreaveET(first_layer, c.transpiration)
+        cmf.HargreaveET(first_layer, cell.transpiration)
 
         # Create the CMF meteo and rain stations
         self.make_stations(prec, t_mean, t_min, t_max)
 
         # Create an outlet
-        self.outlet = p.NewOutlet("outlet", 10, 0, 0)
+        self.outlet = project.NewOutlet("outlet", 10, 0, 0)
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         # Now create all storages which are depended on the genes provided
         if "snow" in self.genes:
-            c.add_storage("snow", "s")
-            cmf.Snowfall(c.snow, c)
+            cell.add_storage("Snow", "S")
+            cmf.Snowfall(cell.snow, cell)
 
         if "canopy" in self.genes:
-            c.add_storage("canopy", "c")
+            cell.add_storage("Canopy", "C")
 
         if "second" in self.genes:
-            c.add_layer(5.0)
+            cell.add_layer(5.0)
 
         if "third" in self.genes:
-            c.add_layer(10.0)
+            cell.add_layer(10.0)
 
         if "river" in self.genes:
-            c.add_storage("river", "r")
+            cell.add_storage("river", "r")
 
     @staticmethod
     def create_params_from_genes(genes):
@@ -109,90 +109,33 @@ class LumpedModelCMF:
         params.append(distribution("ETV1", 0., 200.))
         params.append(distribution("fETV0", 0., 0.5))
 
-        # Determine which storages exists:
-        river = "river" in genes
-        second_layer = "second_layer" in genes
-        third_layer = "third_layer" in genes
-
-        # Allow the creation of the different parameters depending on the
-        # existence of the different storages
-
-        # All layers and the river exist
-        if second_layer and third_layer and river:
-            # Add transition times
-            if "tr_first_out" in genes:
-                params.append(distribution("tr_first_out", 0., 300.))
-
-            if "tr_first_river" in genes and "river" in genes:
-                params.append(distribution("tr_first_river", 0., 300.))
-
-            if "tr_first_second" in genes and "second_layer" in genes:
-                params.append(distribution("tr_first_second", 0., 300.))
-
-            if "tr_second_third" in genes:
-                params.append(distribution("tr_second_third", 0., 300.))
-
-            if "tr_second_river" in genes:
-                params.append(distribution("tr_second_river", 0., 300.))
-
-            if "tr_third_river" in genes:
-                params.append(distribution("tr_third_river", 0., 300.))
-
-            # The river tr is added by default.
-            params.append(distribution("tr_river_out", 0., 300.))
-
-            # Add betas
-            if "beta_first_out" in genes:
-                params.append(distribution("beta_first_out", 0., 4.))
-
-            if "beta_first_river" in genes:
-                params.append(distribution("beta_first_river", 0., 4.))
-
-            if "beta_first_second" in genes:
-                params.append(distribution("beta_first_second", 0., 4.))
-
-            if "beta_second_river" in genes:
-                params.append(distribution("beta_second_river", 0., 4.))
-
-            if "beta_second_third" in genes:
-                params.append(distribution("beta_second_third", 0., 4.))
-
-            if "beta_third_river" in genes:
-                params.append(distribution("beta_third_river", 0., 4.))
-
-            if "beta_river_out" in genes:
-                params.append(distribution("beta_river_out", 0., 4.))
-
-        # All layers, but not the river exis
-        elif second_layer and third_layer and not river:
-            pass
-        # The second or third layer exist (which one does not matter,
-        # as it will result in a two storage model either way)
-        # and the river exists too
-        elif (second_layer or third_layer) and river:
-            pass
-        # The second or the third layer exist but not the river
-        elif (second_layer or third_layer) and not river:
-            pass
-        # Only one layer and the river exist
-        elif not second_layer and not third_layer and river:
-            pass
-        # Only one layer exists
-        elif not second_layer and not third_layer and not river:
-            pass
-
-        # Add Snow paramters
-        if "meltrate" in genes:
-            params.append(distribution("meltrate", 0., 15.))
-
-        if "snow_melt_temp" in genes:
-            params.append(distribution("snow_melt_temp", -5.0, 5.0))
-
-        # Add
+        # Create all the other parameters if they exist.
+        for gene in genes:
+            # tr = transitition time
+            if "tr_" in gene:
+                params.append(distribution(gene, 0., 300.))
+            # Exponent to scale the kinematic wave
+            elif "beta" in gene:
+                params.append(distribution(gene, 0., 4.))
+            # Rate in which the snow melts
+            elif "snow_meltrate" in gene:
+                params.append(distribution(gene, 0., 15.))
+            # Temperatur at which the snow melts
+            elif "snow_melt_temp" in gene:
+                params.append(distribution(gene, -5.0, 5.0))
+            # Field capacity like feature
+            elif "v0" in gene:
+                params.append(distribution(gene, 0., 200))
+            # Closure of the canopy
+            elif "canopy_closure" in gene:
+                params.append(distribution(gene, 0., 1.0))
+            # Leaf area index
+            elif "canopy_lai" in gene:
+                params.append(distribution(gene, 1., 14.))
 
         return params
 
-    def setparameters(self, **kwargs):
+    def set_parameters(self, **kwargs):
         """
         Creates all connections with the parameter values produced by the
         sampling algorithm.
@@ -252,21 +195,21 @@ class LumpedModelCMF:
             solver = cmf.CVodeIntegrator(self.project, 1e-8)
 
             # New time series for model results
-            resQ = cmf.timeseries(self.begin, cmf.day)
+            resQ = cmf.timeseries(self.begin_calibration, cmf.day)
             # starts the solver and calculates the daily time steps
-            end = self.end
+            end = self.end_validation
             for t in solver.run(self.project.meteo_stations[0].T.begin, end,
                                 cmf.day):
                 # Fill the results (first year is included but not used to
                 # calculate the NS)
-                if t >= self.begin:
+                if t >= self.begin_calibration:
                     resQ.add(self.outlet.waterbalance(t))
             return resQ
         # Return an nan - array when a runtime error occurs
         except RuntimeError:
-            return np.array(self.Q[
-                            self.begin:self.end + datetime.timedelta(
-                                days=1)])*np.nan
+            return np.array(self.obs_discharge[
+                            self.begin_calibration:self.end_validation +
+                            datetime.timedelta(days=1)])*np.nan
 
     def simulation(self, vector):
         """
@@ -283,7 +226,8 @@ class LumpedModelCMF:
         For Spotpy. Creates a numpy array from the evaluation timeseries.
         """
         return np.array(
-            self.Q[self.begin:self.end + datetime.timedelta(days=1)])
+            self.obs_discharge[self.begin_calibration:self.end_calibration +
+                           datetime.timedelta(days=1)])
 
     def parameters(self):
         """
