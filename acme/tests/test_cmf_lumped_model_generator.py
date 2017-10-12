@@ -10,7 +10,7 @@ import acme.genetics as genetics
 import datetime
 import math
 import cmf
-import pickle
+import copy
 
 
 class GeneratorsTests(unittest.TestCase):
@@ -197,7 +197,7 @@ class GeneratorsTests(unittest.TestCase):
         Tests if the method create_params_from_genes from the CMF lumped
         model template creates the param list correctly.
         """
-        genes = generator.LumpedCMFGenerator.gene_set
+        genes = copy.deepcopy(generator.LumpedCMFGenerator.gene_set)
         params = (template.LumpedModelCMF.
                   create_params_from_genes(genes))
 
@@ -206,14 +206,23 @@ class GeneratorsTests(unittest.TestCase):
             if param.name != "ETV1" and param.name != "fETV0":
                 params_names.append(param.name)
 
-        self.assertTrue(len(params) == len(genes)
+        # Exclude the storages and add the ET parameters
+        genes = set(genes).difference(set(copy.deepcopy(
+            generator.LumpedCMFGenerator.storages)))
+
+        print("\n test_create_params_from_genes")
+        print("Genes = " + str(genes) + " \nLaenge = " + str(len(genes)))
+        print("Parameter Names = " + str(params_names) + " \nLaenge = " + str(
+            len(params_names)))
+
+        self.assertTrue(len(params_names) == len(genes)
                         and
                         # Check if the param is created as an
                         # distribution object
                         params[0].optguess is not None
                         and
                         # Both sets should be the same if all worked well
-                        set(genes) == set(params_names))
+                        genes == set(params_names))
 
     def test_create_all_possible_genes_present(self):
         """
