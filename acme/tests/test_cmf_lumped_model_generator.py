@@ -54,7 +54,7 @@ class GeneratorsTests(unittest.TestCase):
 
         :return: None
         """
-
+        print("\n test_get_fitness")
         genes = generator.LumpedCMFGenerator.gene_set
         precipitation, temperature_avg, temperature_min, \
             temperature_max, discharge = load_data(

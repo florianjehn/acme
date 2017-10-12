@@ -79,11 +79,11 @@ class LumpedModelCMF:
 
         # Now create all storages which are depended on the genes provided
         if "snow" in self.genes:
-            cell.add_storage("Snow", "S")
+            self.snow = cell.add_storage("Snow", "S")
             cmf.Snowfall(cell.snow, cell)
 
         if "canopy" in self.genes:
-            cell.add_storage("Canopy", "C")
+            self.canopy = cell.add_storage("Canopy", "C")
 
         if "second" in self.genes:
             cell.add_layer(5.0)
@@ -92,7 +92,7 @@ class LumpedModelCMF:
             cell.add_layer(10.0)
 
         if "river" in self.genes:
-            cell.add_storage("river", "r")
+            self.river = cell.add_storage("river", "r")
 
     @staticmethod
     def create_params_from_genes(genes):
@@ -111,7 +111,7 @@ class LumpedModelCMF:
 
         # Create all the other parameters if they exist.
         for gene in genes:
-            # tr = transitition time
+            # tr = transition time
             if "tr_" in gene:
                 params.append(distribution(gene, 0., 300.))
             # Exponent to scale the kinematic wave
@@ -120,7 +120,7 @@ class LumpedModelCMF:
             # Rate in which the snow melts
             elif "snow_meltrate" in gene:
                 params.append(distribution(gene, 0., 15.))
-            # Temperatur at which the snow melts
+            # Temperature at which the snow melts
             elif "snow_melt_temp" in gene:
                 params.append(distribution(gene, -5.0, 5.0))
             # Field capacity like feature
@@ -135,35 +135,38 @@ class LumpedModelCMF:
 
         return params
 
-    def set_parameters(self, **kwargs):
+    def setparameters(self, **kwargs):
         """
         Creates all connections with the parameter values produced by the
         sampling algorithm.
         """
-        # Import all
-        c = self.project[0]
-        outlet = self.outlet
+        param_dict = kwargs
+        # Import cell
+        cell = self.project[0]
 
-        def all_layers():
-            pass
+        # Make a dictionary to lookup the different storages
+        # Check for all variable entries if they exist.
+        storages = {"first": cell.layers[0],
+                    "second": cell.layers[1] if cell.layers[1] is not None
+                    else None,
+                    "third": cell.layers[2] if cell.layers[2] is not None
+                    else None,
+                    "river": self.river if self.river is not None else None,
+                    "snow": self.snow if self.snow is not None else None,
+                    "canopy": self.canopy if self.canopy is not None else None,
+                    "out": self.outlet}
 
-        def second_and_third_layer():
-            pass
 
-        def first_and_third_layer():
-            pass
+        # Set all parameters
+        for param_name in param_dict.keys():
+            # Set the kinematic waves
+            if "tr_" in param_name:
+                name, source, target = param_name.split("_")
 
-        def first_and_second_layer():
-            pass
 
-        def only_first_layer():
-            pass
 
-        def only_second_layer():
-            pass
+        print(kwargs)
 
-        def only_third_layer():
-            pass
 
     def make_stations(self, prec, temp, temp_min, temp_max):
         """
