@@ -37,7 +37,7 @@ setup(
   include_package_data=True,
   keywords=['Evolution', 'lumped models', 'Genetic Algorithms', 'Hydrology',
             'Simulated Annealing', 'CMF', 'ROPE', 'Uncertainty',
-            'Calibration', 'Model', 'Signatures'],
+            'Calibration', 'Model', 'Signatures', 'Validation'],
   classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
