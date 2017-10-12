@@ -82,7 +82,6 @@ class GeneratorsTests(unittest.TestCase):
                                         datetime.datetime(1983, 12, 31))
         self.assertTrue(fitness > 0)
 
-
     def test_display(self):
         """
         Calls the display function with one test set to determine if it works
@@ -91,7 +90,8 @@ class GeneratorsTests(unittest.TestCase):
         """
         start_time = datetime.datetime.now() - datetime.timedelta(0, 3)
         candidate = genetics.genetic.Chromosome(
-            ["snow", "first_layer"], 0.8, genetics.genetic.Strategies.create)
+            ["snow", "second", "tr_first_out"], 0.8,
+            genetics.genetic.Strategies.create)
         generator.display(candidate, start_time)
 
     def test_mutation(self):
@@ -286,7 +286,6 @@ class GeneratorsTests(unittest.TestCase):
         genes = generator.del_inactive_params(genes)
         print(genes)
         self.assertTrue(set(genes) == {"tr_first_out", "beta_first_out"})
-
 
     def test_del_inactive_storages(self):
         """
