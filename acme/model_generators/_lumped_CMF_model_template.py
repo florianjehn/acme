@@ -155,7 +155,7 @@ class LumpedModelCMF:
                     "snow": self.snow if self.snow is not None else None,
                     "canopy": self.canopy if self.canopy is not None else None,
                     "out": self.outlet}
-
+    print
 
         # Set all parameters
         for param_name in param_dict.keys():
