@@ -231,7 +231,7 @@ class GeneratorsTests(unittest.TestCase):
                   "{}".format(set(self.gene_set) - set(genes)))
             self.assertTrue(False)
 
-    def test_del_inactive_params(self):
+    def test_del_inactive_params_1(self):
         """
         Tests if only the inactive genes are deleted.
 
@@ -276,7 +276,7 @@ class GeneratorsTests(unittest.TestCase):
         del models_so_far[model_1_str]
         del models_so_far[model_2_str]
 
-    def test_del_inactive_params(self):
+    def test_del_inactive_params_2(self):
         """
         Tests if inactive params are deleted correctly.
 
@@ -299,6 +299,24 @@ class GeneratorsTests(unittest.TestCase):
         self.assertTrue(set(genes) == {"tr_first_out", "tr_second_out",
                                        "beta_first_out"})
 
+    def test_find_active_genes(self):
+        """
+        Tests if the Method is correctly finding the active genes and return
+        them.
+
+        :return: None
+        """
+        genes = ["snow", "snow_meltrate", "canopy_closure", "second",
+                 "tr_second_out", "tr_first_second", "third", "tr_third_river"]
+        active_genes = generator.find_active_genes(genes)
+        right_solution = ["snow", "snow_meltrate", "second",
+                 "tr_second_out", "tr_first_second"]
+
+        self.assertTrue(len(active_genes) < len(genes)
+                        and
+                        len(active_genes) == len(right_solution)
+                        and
+                        set(active_genes) == set(right_solution))
 
 
 def load_data(discharge_file, temperature_file, precipitation_file,
