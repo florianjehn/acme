@@ -273,7 +273,7 @@ def del_inactive_storages(genes):
     # Find all connection genes
     connections = []
     for gene in genes:
-        if "tr" in gene:
+        if "tr_" in gene:
             connections.append(gene)
 
     # Cycle through all connection genes and split them in sources and targets
@@ -283,6 +283,15 @@ def del_inactive_storages(genes):
         name, source, target = connection.split("_")
         sources.append(source)
         targets.append(target)
+
+    # Add snow and canopy if they are present
+    if "snow" in genes:
+        sources.append("snow")
+        targets.append("snow")
+
+    if "canopy" in genes:
+        sources.append("canopy")
+        targets.append("canopy")
 
     # Determine which storages are present in the genes
     possible_storages = LumpedCMFGenerator.storages
@@ -315,7 +324,7 @@ def del_inactive_params(genes):
     # Add the first layer to the copy, so the connections  from first are
     # not all deleted by default.
     # Determine which storages are present in the genes
-    possible_storages = LumpedCMFGenerator.storages + ["first"]
+    possible_storages = LumpedCMFGenerator.storages
     actual_storages = ["first"]
     for possible_storage in possible_storages:
         for gene in genes:

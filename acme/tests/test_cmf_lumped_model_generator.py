@@ -92,6 +92,7 @@ class GeneratorsTests(unittest.TestCase):
         candidate = genetics.genetic.Chromosome(
             ["snow", "second", "tr_first_out"], 0.8,
             genetics.genetic.Strategies.create)
+        print("\n test_display")
         generator.display(candidate, start_time)
 
     def test_mutation(self):
@@ -119,6 +120,7 @@ class GeneratorsTests(unittest.TestCase):
                 count_del += 1
             elif len(genes_copy) == len_before:
                 count_swap += 1
+        print("\n test_mutation")
         print("Added: {}\tDeleted:{}\tSwapped:{}\n\n".format(count_add,
                                                              count_del,
                                                              count_swap))
@@ -187,6 +189,7 @@ class GeneratorsTests(unittest.TestCase):
             genes = generator.create()
             if len(genes) > 0:
                 not_empty += 1
+        print("\n test_create_returns_not_empty_list_most_of_time")
         print("not_empty = {}".format(not_empty))
         self.assertTrue(isinstance(genes, list) and not_empty > 900)
 
@@ -225,6 +228,7 @@ class GeneratorsTests(unittest.TestCase):
         if set(genes) == set(self.gene_set):
             self.assertTrue(True)
         else:
+            print("\n test_create_all_possible_genes")
             print("The following genes were in genes and not in "
                   "gene_set: {}".format(set(genes) - set(self.gene_set)))
             print("The following genes were in gene_set, but not in genes: "
@@ -243,6 +247,7 @@ class GeneratorsTests(unittest.TestCase):
 
         # From this test set tr_second_out should be deleted. All other
         # connections should remain.
+        print("\n test_del_inactive_params")
         print("genes is {}".format(genes))
         print("genes_copy is {}".format(genes_copy))
         self.assertTrue("snow" in genes_copy
@@ -284,7 +289,6 @@ class GeneratorsTests(unittest.TestCase):
         """
         genes = ["tr_first_out", "tr_second_out", "beta_first_out"]
         genes = generator.del_inactive_params(genes)
-        print(genes)
         self.assertTrue(set(genes) == {"tr_first_out", "beta_first_out"})
 
     def test_del_inactive_storages(self):
@@ -310,7 +314,12 @@ class GeneratorsTests(unittest.TestCase):
                  "tr_second_out", "tr_first_second", "third", "tr_third_river"]
         active_genes = generator.find_active_genes(genes)
         right_solution = ["snow", "snow_meltrate", "second",
-                 "tr_second_out", "tr_first_second"]
+                          "tr_second_out", "tr_first_second", "first"]
+
+        print("\n test_active_genes")
+        print("Start genes = " + str(genes))
+        print("Active genes = " + str(active_genes))
+        print("Right solution = " + str(right_solution))
 
         self.assertTrue(len(active_genes) < len(genes)
                         and
