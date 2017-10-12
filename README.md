@@ -19,8 +19,14 @@ ACME is used to automatically construct a lumped, hydrological model for a given
 Using different crossover and mutation techniques in combination with different evaluation schemes from [SPOTPY](http://fb09-pasig.umwelt.uni-giessen.de/spotpy/).
 
 ## Install
-to be implemented
+Installing ACME is straightforward (though not yet working). Just use:
 
+	pip install acme
+
+To be able to use it properly you need SPOTPY and CMF as well:
+
+	pip install spotpy
+	pip install cmf
 ## Support
 - Feel free to contact the authors of this tool for any support questions.
 - Please contact the authors in case of any bug.
