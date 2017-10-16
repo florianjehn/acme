@@ -58,9 +58,9 @@ class GeneratorsTests(unittest.TestCase):
         genes = generator.LumpedCMFGenerator.gene_set
         precipitation, temperature_avg, temperature_min, \
             temperature_max, discharge = load_data(
-                "GrebenauQTagMittel__1979_1990.txt",
-                "Temp_max_min_avg_1979_1988.txt",
-                "Prec_Grebenau_1979_1988.txt",
+                "observed_discharge.txt",
+                "temperature_max_min_avg.txt",
+                "precipitation.txt",
                 2976.41
             )
         data = {
