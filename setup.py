@@ -33,7 +33,11 @@ setup(
   license='Apache-2.0',
   packages=["acme", "acme.examples", "acme.genetics",
             "acme.model_generators", "acme.visualization", "acme.tests"],
-  include_package_data=True,
+  data_files={
+   '': ["acme/tests/precipitation.txt",
+                  "acme/tests/observed_discharge.txt",
+                  "acme/tests/temperature_max_min_avg.txt"]},
+
   keywords=['Evolution', 'lumped models', 'Genetic Algorithms', 'Hydrology',
             'Simulated Annealing', 'CMF', 'ROPE', 'Uncertainty',
             'Calibration', 'Model', 'Signatures', 'Validation'],
