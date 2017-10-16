@@ -349,13 +349,17 @@ def load_data(discharge_file, temperature_file, precipitation_file,
     step = datetime.timedelta(days=1)
     # empty time series
     precipitation = cmf.timeseries(begin, step)
-    print(os.getcwd())
-    with open(precipitation_file) as precipitation_file_file:
+    if os.name == "nt":
+        cwd = os.getcwd() + os.sep
+    else:
+        cwd = os.getcwd() + os.sep + "acme" + os.sep + "tests" + os.sep
+    print("Current Working Directory = " + cwd)
+    with open(cwd + precipitation_file) as precipitation_file_file:
         precipitation.extend(float(precipitation_str) for
                              precipitation_str in
                              precipitation_file_file)
     discharge = cmf.timeseries(begin, step)
-    with open(discharge_file) as discharge_file_file:
+    with open(cwd + discharge_file) as discharge_file_file:
         discharge.extend(float(discharge_str) for discharge_str in
                          discharge_file_file)
     # Convert m3/s to mm/day
@@ -365,7 +369,7 @@ def load_data(discharge_file, temperature_file, precipitation_file,
     temperature_max = cmf.timeseries(begin, step)
 
     # Go through all lines in the file
-    with open(temperature_file) as temperature_file_file:
+    with open(cwd + temperature_file) as temperature_file_file:
         for line in temperature_file_file:
             columns = line.split('\t')
             if len(columns) == 3:
