@@ -11,6 +11,7 @@ import datetime
 import math
 import cmf
 import copy
+import os
 
 
 class GeneratorsTests(unittest.TestCase):
@@ -348,6 +349,7 @@ def load_data(discharge_file, temperature_file, precipitation_file,
     step = datetime.timedelta(days=1)
     # empty time series
     precipitation = cmf.timeseries(begin, step)
+    print(os.getcwd())
     with open(precipitation_file) as precipitation_file_file:
         precipitation.extend(float(precipitation_str) for
                              precipitation_str in
