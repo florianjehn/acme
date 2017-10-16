@@ -147,8 +147,12 @@ class LumpedModelCMF:
         """
         Creates all connections with the parameter values produced by the
         sampling algorithm.
+
+        :param kwargs: Dictionary of all the parameters and their values.
+        :return None
         """
         param_dict = kwargs
+        cell = self.project[0]
         storages = self.storages
 
         # Find all active connections
@@ -192,17 +196,44 @@ class LumpedModelCMF:
                                V0=connection_params["V0"],
                                exponent=connection_params["beta"])
 
+        # Fill in the snow parameters when they exist.
+        if "snow" in param_dict.keys():
+            try:
+                cmf.Weather.set_snow_threshold(param_dict["snow_melt_temp"])
+            except KeyError:
+                pass
+
+            try:
+                cmf.SimpleTindexSnowMelt(cell.snow, cell.layers[0],
+                                         rate=param_dict["snow_meltrate"])
+            except KeyError:
+                cmf.SimpleTindexSnowMelt(cell.snow, cell.layers[0])
+
+        # Fill in the canopy parameters when they exist
+        if "canopy" in param_dict.keys():
+            # Splits the rainfall in interzeption and throughfall
+            cmf.Rainfall(cell.canopy, cell, False, True)
+            cmf.Rainfall(cell.layers[0], cell, True, False)
+            # Makes a overflow for the interception storage
+            cmf.RutterInterception(cell.canopy, cell.layers[0], cell)
+            # Transpiration on the plants is added
+            cmf.CanopyStorageEvaporation(cell.canopy, cell.evaporation, cell)
+
+            try:
+                cell.vegetation.LAI = param_dict["canopy_lai"]
+            except KeyError:
+                pass
+
+            try:
+                cell.vegetation.CanopyClosure = param_dict["canopy_closure"]
+            except KeyError:
+                pass
+
         # Establish a waterbalance_conncetion if the river does not exist as
         #  a separate storage, so the model treats it as if it would not exist.
         if "river" not in self.genes:
             cmf.waterbalance_connection(self.storages["river"],
                                         self.storages["out"])
-
-
-
-
-
-
 
     def make_stations(self, prec, temp, temp_min, temp_max):
         """
@@ -213,16 +244,13 @@ class LumpedModelCMF:
         self.project.use_nearest_rainfall()
 
         # Temperature data
-        meteo = self.project.meteo_stations.add_station('Meteo Station', (0,
-                                                                          0,
-                                                                          0))
+        meteo = self.project.meteo_stations.add_station('Meteo Station',
+                                                        (0, 0, 0))
         meteo.T = temp
         meteo.Tmin = temp_min
         meteo.Tmax = temp_max
         self.project.use_nearest_meteo()
         return rainstation
-
-    # TODO: Anpassen an ACME
 
     def run_model(self):
         """
