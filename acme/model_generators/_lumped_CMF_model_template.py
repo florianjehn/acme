@@ -156,8 +156,6 @@ class LumpedModelCMF:
                     "canopy": self.canopy if self.canopy is not None else None,
                     "out": self.outlet}
 
-
-
         # Set all parameters
         for param_name in param_dict.keys():
             # Set the kinematic waves
