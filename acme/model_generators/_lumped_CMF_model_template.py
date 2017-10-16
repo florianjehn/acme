@@ -78,7 +78,7 @@ class LumpedModelCMF:
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         # Make a dictionary to lookup the different storages
-        self.storages = {"first": cell.layers[0]}
+        self.storages = {"first": cell.layers[0], "out": self.outlet}
 
         # Now create all storages which are depended on the genes provided
         if "snow" in self.genes:
@@ -91,12 +91,10 @@ class LumpedModelCMF:
             self.storages["canopy"] = self.canopy
 
         if "second" in self.genes:
-            cell.add_layer(5.0)
-            self.storages["second"] = cell.layers[1]
+            self.storages["second"] = cell.add_layer(5.0)
 
         if "third" in self.genes:
-            cell.add_layer(10.0)
-            self.storages["third"] = cell.layers[2]
+            self.storages["third"] = cell.add_layer(10.0)
 
         # Always create the river, but connect it later with a waterbalance
         # connection to the outlet if it does not exist in the genes. This
@@ -151,16 +149,56 @@ class LumpedModelCMF:
         sampling algorithm.
         """
         param_dict = kwargs
-        # Import cell
-        cell = self.project[0]
+        storages = self.storages
+
+        # Find all active connections
+        active_connections = []
+        for param in param_dict.keys():
+            if "tr_" in param:
+                active_connections.append(param)
+
+        # Go through all active connections
+        for connection in active_connections:
+            temp, source_tr, target_tr = connection.split("_")
+
+            # Save the parameter values to be able to create the connection
+            connection_params = {"tr": param_dict[connection],
+                                 "beta": 1.0,
+                                 "V0": 1.0}
+
+            # Find all other parameter which belong to that connection
+            for param in param_dict.keys():
+                try:
+                    name, source_param, target_param = param.split("_")
+                    # Save the values
+                    if ((name == "beta" or name == "V0")
+                        and
+                            source_tr == source_param
+                        and
+                            target_tr == target_param):
+
+                        connection_params[name] = param_dict[param]
+
+                except ValueError:
+                    # ValueError is raised because the not all genes can be
+                    # split in three parts. But as all genes that are of
+                    # interest now can be, the error can pass.
+                    pass
+
+            # Create the connection
+            cmf.kinematic_wave(storages[source_tr],
+                               storages[target_tr],
+                               param_dict[connection],
+                               V0=connection_params["V0"],
+                               exponent=connection_params["beta"])
+
+        # Establish a waterbalance_conncetion if the river does not exist as
+        #  a separate storage, so the model treats it as if it would not exist.
+        if "river" not in self.genes:
+            cmf.waterbalance_connection(self.storages["river"],
+                                        self.storages["out"])
 
 
-
-        # Set all parameters
-        for param_name in param_dict.keys():
-            # Set the kinematic waves
-            if "tr_" in param_name:
-                name, source, target = param_name.split("_")
 
 
 
