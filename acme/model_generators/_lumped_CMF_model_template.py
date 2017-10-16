@@ -77,22 +77,32 @@ class LumpedModelCMF:
 
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+        # Make a dictionary to lookup the different storages
+        self.storages = {"first": cell.layers[0]}
+
         # Now create all storages which are depended on the genes provided
         if "snow" in self.genes:
             self.snow = cell.add_storage("Snow", "S")
             cmf.Snowfall(cell.snow, cell)
+            self.storages["snow"] = self.snow
 
         if "canopy" in self.genes:
             self.canopy = cell.add_storage("Canopy", "C")
+            self.storages["canopy"] = self.canopy
 
         if "second" in self.genes:
             cell.add_layer(5.0)
+            self.storages["second"] = cell.layers[1]
 
         if "third" in self.genes:
             cell.add_layer(10.0)
+            self.storages["third"] = cell.layers[2]
 
-        if "river" in self.genes:
-            self.river = cell.add_storage("River", "R")
+        # Always create the river, but connect it later with a waterbalance
+        # connection to the outlet if it does not exist in the genes. This
+        # makes an easier connection with the other
+        self.river = cell.add_storage("River", "R")
+        self.storages["river"] = self.river
 
     @staticmethod
     def create_params_from_genes(genes):
@@ -144,15 +154,7 @@ class LumpedModelCMF:
         # Import cell
         cell = self.project[0]
 
-        # Make a dictionary to lookup the different storages
-        # Check for all variable entries if they exist.
-        storages = {"first": cell.layers[0],
-                    "second": cell.layers[1] if cell.layers[1] else None,
-                    "third": cell.layers[2] if cell.layers[2] else None,
-                    "canopy": self.canopy if self.canopy else None,
-                    "snow": self.snow if self.snow else None,
-                    "river": self.river if self.river else None,
-                    "out": self.outlet}
+
 
         # Set all parameters
         for param_name in param_dict.keys():
