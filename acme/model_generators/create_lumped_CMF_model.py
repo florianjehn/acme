@@ -34,7 +34,7 @@ class LumpedCMFGenerator:
     storages = ["snow", "canopy", "second", "third", "river"]
     connections = ["tr_first_out", "tr_first_river", "tr_first_second",
                    "tr_second_third", "tr_second_river",
-                   "tr_third_river"]
+                   "tr_third_river", "tr_river_out"]
     snow_params = ["snow_meltrate", "snow_melt_temp"]
     canopy_params = ["canopy_lai", "canopy_closure"]
     first_layer_params = ["beta_first_out", "beta_first_river",

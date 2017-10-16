@@ -92,7 +92,7 @@ class LumpedModelCMF:
             cell.add_layer(10.0)
 
         if "river" in self.genes:
-            self.river = cell.add_storage("river", "r")
+            self.river = cell.add_storage("River", "R")
 
     @staticmethod
     def create_params_from_genes(genes):
@@ -147,13 +147,11 @@ class LumpedModelCMF:
         # Make a dictionary to lookup the different storages
         # Check for all variable entries if they exist.
         storages = {"first": cell.layers[0],
-                    "second": cell.layers[1] if cell.layers[1] is not None
-                    else None,
-                    "third": cell.layers[2] if cell.layers[2] is not None
-                    else None,
-                    "river": self.river if self.river is not None else None,
-                    "snow": self.snow if self.snow is not None else None,
-                    "canopy": self.canopy if self.canopy is not None else None,
+                    "second": cell.layers[1] if cell.layers[1] else None,
+                    "third": cell.layers[2] if cell.layers[2] else None,
+                    "canopy": self.canopy if self.canopy else None,
+                    "snow": self.snow if self.snow else None,
+                    "river": self.river if self.river else None,
                     "out": self.outlet}
 
         # Set all parameters
@@ -164,7 +162,6 @@ class LumpedModelCMF:
 
 
 
-        print(kwargs)
 
 
     def make_stations(self, prec, temp, temp_min, temp_max):
