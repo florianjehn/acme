@@ -27,8 +27,7 @@ setup(
   version=acme.__version__,
   description='Automated Construction of Model by Evolution',
   long_description=long_description,
-  author='Florian Jehn, Tobias Houska, Philipp Kraft, Alejandro '
-          'Chamorro-Chavez, Konrad Bestian and Lutz Breuer',
+  author='Florian Jehn, Tobias Houska, Philipp Kraft, Lutz Breuer',
   author_email='florian.u.jehn@umwelt.uni-giessen.de',
   url='https://github.com/zutn/ACME',
   license='Apache-2.0',
