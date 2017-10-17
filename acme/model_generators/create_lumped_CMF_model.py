@@ -232,7 +232,7 @@ def get_fitness(genes, data,
 
     # The template runs until the predefined convergence value of dream is
     # reached (or the maximal value for repetitions is reached).
-    sampler.sample(500, convergence_limit=1.6)
+    sampler.sample(10, convergence_limit=1.6)
 
     # Extract the best value from the model
     best_like = sampler.bestlike

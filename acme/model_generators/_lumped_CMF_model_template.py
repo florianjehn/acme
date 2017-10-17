@@ -12,6 +12,7 @@ import datetime
 import spotpy
 import numpy as np
 import cmf
+import acme.tests.get_storages_fluxes as get_storages_and_fluxes
 
 
 class LumpedModelCMF:
@@ -127,7 +128,7 @@ class LumpedModelCMF:
                 params.append(distribution(gene, 0., 4.))
             # Rate in which the snow melts
             elif "snow_meltrate" in gene:
-                params.append(distribution(gene, 0., 15.))
+                params.append(distribution(gene, 0.1, 15.))
             # Temperature at which the snow melts
             elif "snow_melt_temp" in gene:
                 params.append(distribution(gene, -5.0, 5.0))
@@ -167,6 +168,9 @@ class LumpedModelCMF:
 
             # Save the parameter values to be able to create the connection
             connection_params = {"tr": param_dict[connection],
+                                 # Include the default values for beta and
+                                 # V0, so a kinematic wave can always be
+                                 # created.
                                  "beta": 1.0,
                                  "V0": 1.0}
 
@@ -199,23 +203,23 @@ class LumpedModelCMF:
         # Fill in the snow parameters when they exist.
         if "snow" in param_dict.keys():
             try:
+                cmf.SimpleTindexSnowMelt(cell.snow, cell.surfacewater,
+                                         rate=param_dict["snow_meltrate"])
+            except KeyError:
+                cmf.SimpleTindexSnowMelt(cell.snow, cell.surfacewater)
+
+            try:
                 cmf.Weather.set_snow_threshold(param_dict["snow_melt_temp"])
             except KeyError:
                 pass
-
-            try:
-                cmf.SimpleTindexSnowMelt(cell.snow, cell.layers[0],
-                                         rate=param_dict["snow_meltrate"])
-            except KeyError:
-                cmf.SimpleTindexSnowMelt(cell.snow, cell.layers[0])
 
         # Fill in the canopy parameters when they exist
         if "canopy" in param_dict.keys():
             # Splits the rainfall in interzeption and throughfall
             cmf.Rainfall(cell.canopy, cell, False, True)
-            cmf.Rainfall(cell.layers[0], cell, True, False)
+            cmf.Rainfall(cell.surfacewater, cell, True, False)
             # Makes a overflow for the interception storage
-            cmf.RutterInterception(cell.canopy, cell.layers[0], cell)
+            cmf.RutterInterception(cell.canopy, cell.surfacewater, cell)
             # Transpiration on the plants is added
             cmf.CanopyStorageEvaporation(cell.canopy, cell.evaporation, cell)
 
@@ -256,7 +260,7 @@ class LumpedModelCMF:
         """
         Starts the model. Used by spotpy
         """
-
+        cell = self.project[0]
         try:
             # Create a solver for differential equations
             solver = cmf.CVodeIntegrator(self.project, 1e-8)
@@ -269,11 +273,25 @@ class LumpedModelCMF:
                                 cmf.day):
                 # Fill the results (first year is included but not used to
                 # calculate the NS)
+                print(t)
+                print("storages")
+                storages = get_storages_and_fluxes.storages_of_cell(
+                    cell.rain_source, cell)
+                fluxes = get_storages_and_fluxes.flux_of_all_nodes_of_cell(
+                    cell.rain_source, cell, t)
+                fluxes = \
+                    get_storages_and_fluxes.convert_fluxes_for_fluxogram(
+                        fluxes)
+                print(storages)
+                print("Fluxes")
+                print(fluxes)
+                print("\n")
                 if t >= self.begin_calibration:
                     resQ.add(self.outlet.waterbalance(t))
             return resQ
         # Return an nan - array when a runtime error occurs
         except RuntimeError:
+            print("Runtime Error")
             return np.array(self.obs_discharge[
                             self.begin_calibration:self.end_validation +
                             datetime.timedelta(days=1)])*np.nan
@@ -294,7 +312,7 @@ class LumpedModelCMF:
         """
         return np.array(
             self.obs_discharge[self.begin_calibration:self.end_calibration +
-                           datetime.timedelta(days=1)])
+                               datetime.timedelta(days=1)])
 
     def parameters(self):
         """
@@ -306,6 +324,8 @@ class LumpedModelCMF:
         """
         For Spotpy. Tells Spotpy how the model is to be evaluated.
         """
+        simulation_calib = simulation[
+                           self.begin_validation: self.end_validation]
         # Todo: Hier noch hydrological signatures?
         return spotpy.likelihoods.gaussianLikelihoodMeasErrorOut(evaluation,
-                                                                 simulation)
+                                                            simulation_calib)
