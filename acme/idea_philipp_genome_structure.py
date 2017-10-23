@@ -1,8 +1,11 @@
+import random
+
 class Param:
-    def __init__(self, thres, min, max):
-        pass
-    def applies():
-        return random.random()<self.thres or test
+    def __init__(self, thres, min, max, test=False):
+        self.test=test
+
+    def applies(self):
+        return random.random()<self.thres or self.test
 class Gene:
     def __init__(self, **kwargs):
         self.params = kwargs
