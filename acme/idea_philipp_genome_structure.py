@@ -6,8 +6,8 @@ class Param:
 class Gene:
     def __init__(self, **kwargs):
         self.params = kwargs
-genes['snow'] = Gene(meltrate=Param(0.5,0.5,20), 
-            melt_temp=Param(0.5, -2., 2.))
+genes={['snow'] : Gene(meltrate=Param(0.5,0.5,20),
+            melt_temp=Param(0.5, -2., 2.))}
         
         
-expressed_genes = 
+expressed_genes = []
