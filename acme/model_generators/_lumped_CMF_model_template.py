@@ -202,10 +202,10 @@ class LumpedModelCMF:
         # Fill in the snow parameters when they exist. If not
         # leave them at CMFs default value.
         if "snow" in self.genes:
-            cmf.SimpleTindexSnowMelt(cell.snow, cell.surfacewater,
+            cmf.SimpleTindexSnowMelt(cell.snow, cell.surfacewater, cell,
                                      rate=param_dict.get("snow_meltrate", 7))
-            cmf.Weather.set_snow_threshold(param_dict.get([
-                                           "snow_melt_temp"]), 0.5)
+            cmf.Weather.set_snow_threshold(param_dict.get("snow_melt_temp",
+                                                          0.5))
 
         # Fill in the canopy parameters when they exist
         if "canopy" in self.genes:
