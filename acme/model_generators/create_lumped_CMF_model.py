@@ -450,78 +450,66 @@ def create(test=False):
     threshold = 1/3
     genes = []
 
+    def append_eventually(gene_name: str):
+        """
+        Appends a gene to the genes list, when the dice rolls below threshold
+        :param gene_name: The name of the gene
+        :return: True, when the gene is created
+        """
+        if random.random() < threshold or test:
+            genes.append(gene_name)
+            return True
+        else:
+            return False
+
     # Snow
-    if random.random() < threshold or test:
-        genes.append("snow")
-        # Only add the snow parameter genes if there is a snow storage
-        if random.random() < threshold or test:
-            genes.append("snow_meltrate")
-        if random.random() < threshold or test:
-            genes.append("snow_melt_temp")
+    if append_eventually("snow"):
+        append_eventually("snow_meltrate")
+        append_eventually("snow_melt_temp")
 
     # Canopy
-    if random.random() < threshold or test:
-        genes.append("canopy")
-        if random.random() < threshold or test:
-            genes.append("canopy_closure")
-        if random.random() < threshold or test:
-            genes.append("canopy_lai")
+    if append_eventually("canopy"):
+        append_eventually("canopy_closure")
+        append_eventually("canopy_lai")
 
-    # Layers
-    if random.random() < threshold or test:
-        genes.append("second")
-        if random.random() < threshold or test:
-            genes.append("third")
+    # Layers/Storages
+    if append_eventually("second"):
+        append_eventually("third")
 
-    if random.random() < threshold or test:
-        genes.append("river")
+    append_eventually("river")
 
     # Connections first layer
-    if random.random() < threshold or test:
-        genes.append("tr_first_second")
-        if random.random() < threshold or test:
-            genes.append("beta_first_second")
-        if random.random() < threshold or test:
-            genes.append("v0_first_second")
+    if append_eventually("tr_first_second"):
+        append_eventually("beta_first_second")
+        append_eventually("v0_first_second")
 
-    if random.random() < threshold or test:
-        genes.append("tr_first_river")
-        if random.random() < threshold or test:
-            genes.append("beta_first_river")
-        if random.random() < threshold or test:
-            genes.append("v0_first_river")
+    if append_eventually("tr_first_river"):
+        append_eventually("beta_first_river")
+        append_eventually("v0_first_river")
 
-    if random.random() < threshold or test:
-        genes.append("tr_first_out")
-        if random.random() < threshold or test:
-            genes.append("beta_first_out")
-        if random.random() < threshold or test:
-            genes.append("v0_first_out")
+    if append_eventually("tr_first_out"):
+        append_eventually("beta_first_out")
+        append_eventually("v0_first_out")
 
     # Connections second layer
-    if "second" in genes:
+    if append_eventually("second"):
         # loop through until second_layer has a connection so somewhere
         while "tr_second_third" not in genes or "tr_second_river" not in genes:
-            if random.random() < threshold or test:
-                genes.append("tr_second_third")
-                if random.random() < threshold or test:
-                    genes.append("beta_second_third")
-            if random.random() < threshold or test:
-                genes.append("tr_second_river")
-                if random.random() < threshold or test:
-                    genes.append("beta_second_river")
+            if append_eventually("tr_second_third"):
+                append_eventually("beta_second_third")
+
+            if append_eventually("tr_second_river"):
+                append_eventually("beta_second_river")
 
     # Connections third layer
-    if "third" in genes:
+    if append_eventually("third"):
         # always add a connection, otherwise third_layer would be a dead end
         genes.append("tr_third_river")
-        if random.random() < threshold or test:
-            genes.append("beta_third_river")
+        append_eventually("beta_third_river")
 
     # River
-    if "river" in genes:
-        if random.random() < threshold or test:
-            genes.append("beta_river_out")
+    if append_eventually("river"):
+        append_eventually("beta_river_out")
 
     # Check if a connection to the outlet exists
     check_for_connection(genes)
@@ -536,6 +524,7 @@ def write_all_models(test=False):
     which enables the deletion of the file at the end.
     :return: None
     """
+    test = False
     # Open the output file
     name = 'acme_results_' + str(time.time()) + '.csv'
     outfile = open(name, 'w')
