@@ -144,15 +144,14 @@ class LumpedModelCMF:
 
         return params
 
-    def setparameters(self, **kwargs):
+    def setparameters(self, param_dict: dict):
         """
         Creates all connections with the parameter values produced by the
         sampling algorithm.
 
-        :param kwargs: Dictionary of all the parameters and their values.
+        :param param_dict: Dictionary of all the parameters and their values.
         :return None
         """
-        param_dict = kwargs
         cell = self.project[0]
         storages = self.storages
 
@@ -200,21 +199,16 @@ class LumpedModelCMF:
                                V0=connection_params["V0"],
                                exponent=connection_params["beta"])
 
-        # Fill in the snow parameters when they exist.
-        if "snow" in param_dict.keys():
-            try:
-                cmf.SimpleTindexSnowMelt(cell.snow, cell.surfacewater,
-                                         rate=param_dict["snow_meltrate"])
-            except KeyError:
-                cmf.SimpleTindexSnowMelt(cell.snow, cell.surfacewater)
-
-            try:
-                cmf.Weather.set_snow_threshold(param_dict["snow_melt_temp"])
-            except KeyError:
-                pass
+        # Fill in the snow parameters when they exist. If not
+        # leave them at CMFs default value.
+        if "snow" in self.genes:
+            cmf.SimpleTindexSnowMelt(cell.snow, cell.surfacewater,
+                                     rate=param_dict.get("snow_meltrate", 7))
+            cmf.Weather.set_snow_threshold(param_dict.get([
+                                           "snow_melt_temp"]), 0.5)
 
         # Fill in the canopy parameters when they exist
-        if "canopy" in param_dict.keys():
+        if "canopy" in self.genes:
             # Splits the rainfall in interzeption and throughfall
             cmf.Rainfall(cell.canopy, cell, False, True)
             cmf.Rainfall(cell.surfacewater, cell, True, False)
@@ -223,17 +217,13 @@ class LumpedModelCMF:
             # Transpiration on the plants is added
             cmf.CanopyStorageEvaporation(cell.canopy, cell.evaporation, cell)
 
-            try:
-                cell.vegetation.LAI = param_dict["canopy_lai"]
-            except KeyError:
-                pass
+            # Set LAI and Canopy Closure if they exist in the dict. If not
+            # leave them at CMFs default value.
+            cell.vegetation.LAI = param_dict.get("canopy_lai", 2.88)
+            cell.vegetation.CanopyClosure = param_dict.get("canopy_closure",
+                                                           1.0)
 
-            try:
-                cell.vegetation.CanopyClosure = param_dict["canopy_closure"]
-            except KeyError:
-                pass
-
-        # Establish a waterbalance_conncetion if the river does not exist as
+        # Establish a waterbalance_connection if the river does not exist as
         #  a separate storage, so the model treats it as if it would not exist.
         if "river" not in self.genes:
             cmf.waterbalance_connection(self.storages["river"],
@@ -256,7 +246,7 @@ class LumpedModelCMF:
         self.project.use_nearest_meteo()
         return rainstation
 
-    def run_model(self):
+    def run_model(self, verbose = True):
         """
         Starts the model. Used by spotpy
         """
@@ -273,19 +263,20 @@ class LumpedModelCMF:
                                 cmf.day):
                 # Fill the results (first year is included but not used to
                 # calculate the NS)
-                print(t)
-                print("storages")
-                storages = get_storages_and_fluxes.storages_of_cell(
-                    cell.rain_source, cell)
-                fluxes = get_storages_and_fluxes.flux_of_all_nodes_of_cell(
-                    cell.rain_source, cell, t)
-                fluxes = \
-                    get_storages_and_fluxes.convert_fluxes_for_fluxogram(
-                        fluxes)
-                print(storages)
-                print("Fluxes")
-                print(fluxes)
-                print("\n")
+                if verbose:
+                    print(t)
+                    print("storages")
+                    storages = get_storages_and_fluxes.storages_of_cell(
+                        cell.rain_source, cell)
+                    fluxes = get_storages_and_fluxes.flux_of_all_nodes_of_cell(
+                        cell.rain_source, cell, t)
+                    fluxes = \
+                        get_storages_and_fluxes.convert_fluxes_for_fluxogram(
+                            fluxes)
+                    print(storages)
+                    print("Fluxes")
+                    print(fluxes)
+                    print("\n")
                 if t >= self.begin_calibration:
                     resQ.add(self.outlet.waterbalance(t))
             return resQ
@@ -301,8 +292,9 @@ class LumpedModelCMF:
         SpotPy expects a method simulation. This methods calls setparameters
         and runmodels, so SpotPy is satisfied.
         """
-        paramdict = dict((pp.name, v) for pp, v in zip(self.params, vector))
-        self.setparameters(**paramdict)
+        param_dict = dict((pp.name, v) for pp, v in zip(self.params, vector))
+        self.setparameters(param_dict)
+
         sim_discharge = self.run_model()
         return np.array(sim_discharge)
 
