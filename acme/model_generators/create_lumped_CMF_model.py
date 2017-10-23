@@ -472,11 +472,27 @@ def create(test=False):
         append_eventually("canopy_closure")
         append_eventually("canopy_lai")
 
-    # Layers/Storages
+    # Layers/Storages and their connections
     if append_eventually("second"):
-        append_eventually("third")
+        # Connections second layer
+        # loop through until second_layer has a connection so somewhere
+        while "tr_second_third" not in genes or "tr_second_river" not in genes:
+            if append_eventually("tr_second_third"):
+                append_eventually("beta_second_third")
 
-    append_eventually("river")
+            if append_eventually("tr_second_river"):
+                append_eventually("beta_second_river")
+
+        if append_eventually("third"):
+            # Connections third layer
+            # always add a connection, otherwise third_layer would be a dead
+            # end
+            genes.append("tr_third_river")
+            append_eventually("beta_third_river")
+
+    if append_eventually("river"):
+        append_eventually("tr_river_out")
+        append_eventually("beta_river_out")
 
     # Connections first layer
     if append_eventually("tr_first_second"):
@@ -491,26 +507,6 @@ def create(test=False):
         append_eventually("beta_first_out")
         append_eventually("v0_first_out")
 
-    # Connections second layer
-    if append_eventually("second"):
-        # loop through until second_layer has a connection so somewhere
-        while "tr_second_third" not in genes or "tr_second_river" not in genes:
-            if append_eventually("tr_second_third"):
-                append_eventually("beta_second_third")
-
-            if append_eventually("tr_second_river"):
-                append_eventually("beta_second_river")
-
-    # Connections third layer
-    if append_eventually("third"):
-        # always add a connection, otherwise third_layer would be a dead end
-        genes.append("tr_third_river")
-        append_eventually("beta_third_river")
-
-    # River
-    if append_eventually("river"):
-        append_eventually("beta_river_out")
-
     # Check if a connection to the outlet exists
     check_for_connection(genes)
     return genes
@@ -524,7 +520,6 @@ def write_all_models(test=False):
     which enables the deletion of the file at the end.
     :return: None
     """
-    test = False
     # Open the output file
     name = 'acme_results_' + str(time.time()) + '.csv'
     outfile = open(name, 'w')
