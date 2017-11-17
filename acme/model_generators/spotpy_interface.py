@@ -11,7 +11,7 @@ import numpy as np
 import spotpy
 
 
-class SpotpyTemplate:
+class SpotpyInterface:
     def __init__(self):
         self.params = None
         self.setparameters = None

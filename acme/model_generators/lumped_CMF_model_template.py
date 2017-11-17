@@ -13,10 +13,10 @@ import spotpy
 import numpy as np
 import cmf
 import acme.tests.get_storages_fluxes as get_storages_and_fluxes
-import acme.model_generators.spotpy_template as spotpy_template
+import acme.model_generators.spotpy_interface as spotpy_interface
 
 
-class LumpedModelCMF(spotpy_template.SpotpyTemplate):
+class LumpedModelCMF(spotpy_interface.SpotpyInterface):
     def __init__(self, genes, data,
                  begin_calibration, end_calibration,
                  begin_validation, end_validation):
@@ -43,66 +43,79 @@ class LumpedModelCMF(spotpy_template.SpotpyTemplate):
         # Create params list
         self.params = self.create_params_from_genes(self.genes)
 
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        def basic_model_setup():
+            """
+            Creates the basic layout needed for every model structure.
 
-        # Basic Layout, same for all possible models
-        prec = data["prec"]
-        obs_discharge = data["discharge"]
-        t_mean = data["t_mean"]
-        t_min = data["t_min"]
-        t_max = data["t_max"]
-        self.obs_discharge = obs_discharge
+            :return: None
+            """
+            # Basic Layout, same for all possible models
+            prec = data["prec"]
+            obs_discharge = data["discharge"]
+            t_mean = data["t_mean"]
+            t_min = data["t_min"]
+            t_max = data["t_max"]
+            self.obs_discharge = obs_discharge
 
-        # Use only one core (quicker for smaller models)
-        cmf.set_parallel_threads(1)
+            # Use only one core (quicker for smaller models)
+            cmf.set_parallel_threads(1)
 
-        # Generate a project with one cell for a lumped model
-        self.project = cmf.project()
-        project = self.project
+            # Generate a project with one cell for a lumped model
+            self.project = cmf.project()
+            project = self.project
 
-        # Add one cell, which will include all other parts. The area is set
-        # to 1000 m², so the units are easier to understand
-        cell = project.NewCell(0, 0, 0, 1000)
+            # Add one cell, which will include all other parts. The area is set
+            # to 1000 m², so the units are easier to understand
+            cell = project.NewCell(0, 0, 0, 1000)
 
-        # Add a first layer, this one is always present, as a model with no
-        # layers makes no sense
-        first_layer = cell.add_layer(2.0)
+            # Add a first layer, this one is always present, as a model with no
+            # layers makes no sense
+            first_layer = cell.add_layer(2.0)
 
-        # Add an evapotranspiration
-        cmf.HargreaveET(first_layer, cell.transpiration)
+            # Add an evapotranspiration
+            cmf.HargreaveET(first_layer, cell.transpiration)
 
-        # Create the CMF meteo and rain stations
-        self.make_stations(prec, t_mean, t_min, t_max)
+            # Create the CMF meteo and rain stations
+            self.make_stations(prec, t_mean, t_min, t_max)
 
-        # Create an outlet
-        self.outlet = project.NewOutlet("outlet", 10, 0, 0)
+            # Create an outlet
+            self.outlet = project.NewOutlet("outlet", 10, 0, 0)
 
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        basic_model_setup()
 
-        # Make a dictionary to lookup the different storages
-        self.storages = {"first": cell.layers[0], "out": self.outlet}
+        def create_storages():
+            """
+            Creates all storages that are present in the genome.
 
-        # Now create all storages which are depended on the genes provided
-        if "snow" in self.genes:
-            self.snow = cell.add_storage("Snow", "S")
-            cmf.Snowfall(cell.snow, cell)
-            self.storages["snow"] = self.snow
+            :return: None
+            """
+            cell = self.project[0]
+            # Make a dictionary to lookup the different storages
+            self.storages = {"first": cell.layers[0], "out": self.outlet}
 
-        if "canopy" in self.genes:
-            self.canopy = cell.add_storage("Canopy", "C")
-            self.storages["canopy"] = self.canopy
+            # Now create all storages which are depended on the genes provided
+            if "snow" in self.genes:
+                self.snow = cell.add_storage("Snow", "S")
+                cmf.Snowfall(cell.snow, cell)
+                self.storages["snow"] = self.snow
 
-        if "second" in self.genes:
-            self.storages["second"] = cell.add_layer(5.0)
+            if "canopy" in self.genes:
+                self.canopy = cell.add_storage("Canopy", "C")
+                self.storages["canopy"] = self.canopy
 
-        if "third" in self.genes:
-            self.storages["third"] = cell.add_layer(10.0)
+            if "second" in self.genes:
+                self.storages["second"] = cell.add_layer(5.0)
 
-        # Always create the river, but connect it later with a waterbalance
-        # connection to the outlet if it does not exist in the genes. This
-        # makes an easier connection with the other
-        self.river = cell.add_storage("River", "R")
-        self.storages["river"] = self.river
+            if "third" in self.genes:
+                self.storages["third"] = cell.add_layer(10.0)
+
+            # Always create the river, but connect it later with a waterbalance
+            # connection to the outlet if it does not exist in the genes. This
+            # makes an easier connection with the other
+            self.river = cell.add_storage("River", "R")
+            self.storages["river"] = self.river
+
+        create_storages()
 
     @staticmethod
     def create_params_from_genes(genes):
