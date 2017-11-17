@@ -18,6 +18,7 @@ import os
 import copy
 import spotpy
 import time
+import acme.model_generators.genome_arrange as genome_arrange
 
 
 class LumpedCMFGenerator:
@@ -109,6 +110,7 @@ class LumpedCMFGenerator:
             "t_min": t_min,
             "t_max": t_max
         }
+
         # Arguments for genetics behaviour
         self.max_age = max_age
         self.pool_size = pool_size
@@ -119,7 +121,6 @@ class LumpedCMFGenerator:
     def solve(self):
         """
         Starts the process of model selection.
-
         Calls the genetic file with all needed information.
 
         :return: None, but writes the best found model to a file
@@ -200,10 +201,12 @@ def get_fitness(genes, data,
     :return: Fitness value
     """
     # Check if the model to be generated is able to connect to an output
-    check_for_connection(genes)
+    genome_arrange.check_for_connection(genes, LumpedCMFGenerator.connections)
 
     # Find the effective structure of the current genes
-    effective_structure = find_active_genes(genes)
+    effective_structure = genome_arrange.find_active_genes(
+        genes,
+        LumpedCMFGenerator.storages)
 
     # Compare if the genes the function gets, have already been calculated
     #  as a model
@@ -245,106 +248,6 @@ def get_fitness(genes, data,
     return best_like
 
 
-def find_active_genes(genes):
-    """
-    Calls all other methods which strip the genes to only the active ones.
-
-    :param genes: Current genes
-    :return: Copy of current genes, with only the active genes in it.
-    """
-    # Make a copy, so the original remains unchanged
-    genes_copy = copy.deepcopy(genes)
-    # Add the first layer to not delete the genes from there as default
-    genes_copy += ["first"]
-    # Delete all inactive stuff
-    genes_copy = del_inactive_storages(genes_copy)
-    genes_copy = del_inactive_params(genes_copy)
-
-    return genes_copy
-
-
-def del_inactive_storages(genes):
-    """
-    Deletes all storages, which have no inflow from any source.
-
-    :param genes: Current genes
-    :return: Current genes, with all inactive storages deleted
-    """
-    # Find all connection genes
-    connections = []
-    for gene in genes:
-        if "tr_" in gene:
-            connections.append(gene)
-
-    # Cycle through all connection genes and split them in sources and targets
-    sources = []
-    targets = []
-    for connection in connections:
-        name, source, target = connection.split("_")
-        sources.append(source)
-        targets.append(target)
-
-    # Add snow and canopy if they are present
-    if "snow" in genes:
-        sources.append("snow")
-        targets.append("snow")
-
-    if "canopy" in genes:
-        sources.append("canopy")
-        targets.append("canopy")
-
-    # Determine which storages are present in the genes
-    possible_storages = LumpedCMFGenerator.storages
-    actual_storages = []
-    for possible_storage in possible_storages:
-        for gene in genes:
-            if possible_storage == gene:
-                actual_storages.append(gene)
-
-    # Look if storage is in source and target
-    # If not, delete storage
-    for storage in actual_storages:
-        if storage in targets and storage in sources:
-            continue
-        else:
-            genes.remove(storage)
-
-    return genes
-
-
-def del_inactive_params(genes):
-    """
-    Deletes all parameters which do not have their storage present in the
-    current genes
-
-    :param genes: Current genes
-    :return: Current genes, with all inactive params deleted
-    """
-
-    # Add the first layer to the copy, so the connections  from first are
-    # not all deleted by default.
-    # Determine which storages are present in the genes
-    possible_storages = LumpedCMFGenerator.storages
-    actual_storages = ["first"]
-    for possible_storage in possible_storages:
-        for gene in genes:
-            if possible_storage == gene:
-                actual_storages.append(gene)
-
-    # Go through all genes to test if their storage is present.
-    for gene in genes:
-        # Delete all params which do not have their storage present
-        storage_present = False
-        for storage in actual_storages:
-            if storage in gene:
-                storage_present = True
-                break
-        if not storage_present:
-            genes.remove(gene)
-
-    return genes
-
-
 def display(candidate, start_time):
     """
     Display the current candidate and his fitness.
@@ -355,7 +258,9 @@ def display(candidate, start_time):
     """
     time_diff = datetime.datetime.now() - start_time
     # calculate how much % of the genes are active
-    active_genes = find_active_genes(candidate.genes)
+    active_genes = genome_arrange.find_active_genes(
+        candidate.genes,
+        LumpedCMFGenerator.storages)
     activity = len(active_genes) / len(candidate.genes) * 100
     print(("Genes: {}\t\nGene Activity: {} % \t\nFitness: {}\tStrategy: {}\t"
            "Time: {}".format(
@@ -508,7 +413,7 @@ def create(test=False):
         append_eventually("v0_first_out")
 
     # Check if a connection to the outlet exists
-    check_for_connection(genes)
+    genome_arrange.check_for_connection(genes, LumpedCMFGenerator.connections)
     return genes
 
 
@@ -532,7 +437,9 @@ def write_all_models(test=False):
     for genes, like in LumpedCMFGenerator.models_so_far.items():
         # Exclude the non active genes before writing it down
         genes_copy = genes.split()
-        genes_copy = find_active_genes(genes_copy)
+        genes_copy = genome_arrange.find_active_genes(
+            genes_copy,
+            LumpedCMFGenerator.storages)
         genes_copy = ", ".join(genes_copy)
         line = str(like) + ", " + genes_copy + "\n"
         outfile.write(line)
@@ -543,21 +450,3 @@ def write_all_models(test=False):
         os.remove(name)
 
 
-def check_for_connection(genes):
-    """
-    Determines if a there is a connection to the outlet and if not creates one.
-
-    :param genes:
-    :return: None
-    """
-    to_outlet = False
-    outgoing = []
-    for connection in LumpedCMFGenerator.connections:
-        if "out" in connection:
-            outgoing.append(connection)
-    for connection in outgoing:
-        if connection in genes:
-            to_outlet = True
-            break
-    if not to_outlet:
-        genes.append("tr_first_out")

@@ -6,6 +6,7 @@ Created on Aug 17 14:17 2017
 import unittest
 from acme.model_generators import create_lumped_CMF_model as generator
 from acme.model_generators import lumped_CMF_model_template as template
+import acme.model_generators.genome_arrange as genome_arrange
 import acme.genetics as genetics
 import datetime
 import math
@@ -141,7 +142,9 @@ class GeneratorsTests(unittest.TestCase):
         :return: None
         """
         genes = ["snow", "river"]
-        generator.check_for_connection(genes)
+        genome_arrange.check_for_connection(
+            genes,
+            generator.LumpedCMFGenerator.connections)
         self.assertTrue("tr_first_out" in genes and len(genes) == 3)
 
     def test_check_for_connection_outlet_not_present(self):
@@ -152,7 +155,9 @@ class GeneratorsTests(unittest.TestCase):
         """
         genes = ["snow", "river", "tr_first_out"]
         genes_copy = genes[:]
-        generator.check_for_connection(genes)
+        genome_arrange.check_for_connection(
+            genes,
+            generator.LumpedCMFGenerator.connections)
         self.assertTrue(genes == genes_copy)
 
     def test_crossover_list_properties(self):
@@ -252,7 +257,9 @@ class GeneratorsTests(unittest.TestCase):
         """
         genes = ["snow", "snow_meltrate", "tr_first_out", "first",
                  "tr_second_out"]
-        genes_copy = generator.del_inactive_params(genes)
+        genes_copy = genome_arrange.del_inactive_params(
+            genes,
+            generator.LumpedCMFGenerator.storages)
 
         # From this test set tr_second_out should be deleted. All other
         # connections should remain.
@@ -270,7 +277,8 @@ class GeneratorsTests(unittest.TestCase):
                         "tr_second_out" not in genes_copy
                         )
 
-    def test_write_all_models(self):
+    @staticmethod
+    def test_write_all_models():
         """
         Tests if a file is written by calling the method write_all_models.
 
@@ -297,7 +305,9 @@ class GeneratorsTests(unittest.TestCase):
         :return: None
         """
         genes = ["tr_first_out", "tr_second_out", "beta_first_out"]
-        genes = generator.del_inactive_params(genes)
+        genes = genome_arrange.del_inactive_params(
+            genes,
+            generator.LumpedCMFGenerator.storages)
         self.assertTrue(set(genes) == {"tr_first_out", "beta_first_out"})
 
     def test_del_inactive_storages(self):
@@ -308,7 +318,9 @@ class GeneratorsTests(unittest.TestCase):
         """
         genes = ["tr_first_out", "tr_second_out", "beta_first_out", "third",
                                                                     "second"]
-        genes = generator.del_inactive_storages(genes)
+        genes = genome_arrange.del_inactive_storages(
+            genes,
+            generator.LumpedCMFGenerator.storages)
         self.assertTrue(set(genes) == {"tr_first_out", "tr_second_out",
                                        "beta_first_out"})
 
@@ -321,7 +333,8 @@ class GeneratorsTests(unittest.TestCase):
         """
         genes = ["snow", "snow_meltrate", "canopy_closure", "second",
                  "tr_second_out", "tr_first_second", "third", "tr_third_river"]
-        active_genes = generator.find_active_genes(genes)
+        active_genes = genome_arrange.find_active_genes(
+            genes, generator.LumpedCMFGenerator.storages)
         right_solution = ["snow", "snow_meltrate", "second",
                           "tr_second_out", "tr_first_second", "first"]
 
