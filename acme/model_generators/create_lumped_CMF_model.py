@@ -10,7 +10,7 @@ distribution, objective function, etc.).
 The structure is created in such a way, that there is always at least one
 connection to the outlet.
 """
-import acme.model_generators._lumped_CMF_model_template as template
+import acme.model_generators.lumped_CMF_model_template as template
 import acme.genetics.genetic as genetic
 import datetime
 import random

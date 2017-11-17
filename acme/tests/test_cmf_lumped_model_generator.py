@@ -5,7 +5,7 @@ Created on Aug 17 14:17 2017
 """
 import unittest
 from acme.model_generators import create_lumped_CMF_model as generator
-from acme.model_generators import _lumped_CMF_model_template as template
+from acme.model_generators import lumped_CMF_model_template as template
 import acme.genetics as genetics
 import datetime
 import math
