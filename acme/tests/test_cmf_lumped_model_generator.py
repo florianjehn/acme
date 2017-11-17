@@ -5,13 +5,10 @@ Created on Aug 17 14:17 2017
 """
 import unittest
 from acme.model_generators import create_lumped_CMF_model as generator
-from acme.model_generators import lumped_CMF_model_template as template
-import acme.model_generators.genome_arrange as genome_arrange
 import acme.genetics as genetics
 import datetime
 import math
 import cmf
-import copy
 import os
 
 
@@ -83,7 +80,8 @@ class GeneratorsTests(unittest.TestCase):
         # Todo: Enter the right fitness value here for DREAM
         self.assertTrue(fitness > -1)
 
-    def test_display(self):
+    @staticmethod
+    def test_display():
         """
         Calls the display function with one test set to determine if it works
         at all. Cannot determine if the output is as expected.
@@ -135,31 +133,6 @@ class GeneratorsTests(unittest.TestCase):
                                      abs_tol=repetitions * 0.05)
                         )
 
-    def test_check_for_connection_outlet_present(self):
-        """
-        Tests if the the function check_for_connection can detect that an
-        outlet is missing and then add it.
-        :return: None
-        """
-        genes = ["snow", "river"]
-        genome_arrange.check_for_connection(
-            genes,
-            generator.LumpedCMFGenerator.connections)
-        self.assertTrue("tr_first_out" in genes and len(genes) == 3)
-
-    def test_check_for_connection_outlet_not_present(self):
-        """
-        Tests if the the function check_for_connection can detect that an
-        outlet is present and leave the genes unchanged.
-        :return: None
-        """
-        genes = ["snow", "river", "tr_first_out"]
-        genes_copy = genes[:]
-        genome_arrange.check_for_connection(
-            genes,
-            generator.LumpedCMFGenerator.connections)
-        self.assertTrue(genes == genes_copy)
-
     def test_crossover_list_properties(self):
         """
         Tests if the returned value of crossover is a non empty list.
@@ -190,6 +163,7 @@ class GeneratorsTests(unittest.TestCase):
         """
         repetitions = 1000
         not_empty = 0
+        genes = None
         for i in range(repetitions):
             genes = generator.create()
             if len(genes) > 0:
@@ -197,38 +171,6 @@ class GeneratorsTests(unittest.TestCase):
         print("\n test_create_returns_not_empty_list_most_of_time")
         print("not_empty = {}".format(not_empty))
         self.assertTrue(isinstance(genes, list) and not_empty > 900)
-
-    def test_create_params_from_genes(self):
-        """
-        Tests if the method create_params_from_genes from the CMF lumped
-        model template creates the param list correctly.
-        """
-        genes = copy.deepcopy(generator.LumpedCMFGenerator.gene_set)
-        params = (template.LumpedModelCMF.
-                  create_params_from_genes(genes))
-
-        params_names = []
-        for param in params:
-            if param.name != "ETV1" and param.name != "fETV0":
-                params_names.append(param.name)
-
-        # Exclude the storages and add the ET parameters
-        genes = set(genes).difference(set(copy.deepcopy(
-            generator.LumpedCMFGenerator.storages)))
-
-        print("\n test_create_params_from_genes")
-        print("Genes = " + str(genes) + " \nLaenge = " + str(len(genes)))
-        print("Parameter Names = " + str(params_names) + " \nLaenge = " + str(
-            len(params_names)))
-
-        self.assertTrue(len(params_names) == len(genes)
-                        and
-                        # Check if the param is created as an
-                        # distribution object
-                        params[0].optguess is not None
-                        and
-                        # Both sets should be the same if all worked well
-                        genes == set(params_names))
 
     def test_create_all_possible_genes_present(self):
         """
@@ -248,34 +190,6 @@ class GeneratorsTests(unittest.TestCase):
             print("The following genes were in gene_set, but not in genes: "
                   "{}".format(set(self.gene_set) - set(genes)))
             self.assertTrue(False)
-
-    def test_del_inactive_params_1(self):
-        """
-        Tests if only the inactive genes are deleted.
-
-        :return: None
-        """
-        genes = ["snow", "snow_meltrate", "tr_first_out", "first",
-                 "tr_second_out"]
-        genes_copy = genome_arrange.del_inactive_params(
-            genes,
-            generator.LumpedCMFGenerator.storages)
-
-        # From this test set tr_second_out should be deleted. All other
-        # connections should remain.
-        print("\n test_del_inactive_params")
-        print("genes is {}".format(genes))
-        print("genes_copy is {}".format(genes_copy))
-        self.assertTrue("snow" in genes_copy
-                        and
-                        "snow_meltrate" in genes_copy
-                        and
-                        "tr_first_out" in genes_copy
-                        and
-                        "first" in genes_copy
-                        and
-                        "tr_second_out" not in genes_copy
-                        )
 
     @staticmethod
     def test_write_all_models():
@@ -297,57 +211,6 @@ class GeneratorsTests(unittest.TestCase):
         # Delete them again, to not cause trouble when the program itself runs
         del models_so_far[model_1_str]
         del models_so_far[model_2_str]
-
-    def test_del_inactive_params_2(self):
-        """
-        Tests if inactive params are deleted correctly.
-
-        :return: None
-        """
-        genes = ["tr_first_out", "tr_second_out", "beta_first_out"]
-        genes = genome_arrange.del_inactive_params(
-            genes,
-            generator.LumpedCMFGenerator.storages)
-        self.assertTrue(set(genes) == {"tr_first_out", "beta_first_out"})
-
-    def test_del_inactive_storages(self):
-        """
-        Tests if incative storages are deleted correctly.
-
-        :return: None
-        """
-        genes = ["tr_first_out", "tr_second_out", "beta_first_out", "third",
-                                                                    "second"]
-        genes = genome_arrange.del_inactive_storages(
-            genes,
-            generator.LumpedCMFGenerator.storages)
-        self.assertTrue(set(genes) == {"tr_first_out", "tr_second_out",
-                                       "beta_first_out"})
-
-    def test_find_active_genes(self):
-        """
-        Tests if the Method is correctly finding the active genes and return
-        them.
-
-        :return: None
-        """
-        genes = ["snow", "snow_meltrate", "canopy_closure", "second",
-                 "tr_second_out", "tr_first_second", "third", "tr_third_river"]
-        active_genes = genome_arrange.find_active_genes(
-            genes, generator.LumpedCMFGenerator.storages)
-        right_solution = ["snow", "snow_meltrate", "second",
-                          "tr_second_out", "tr_first_second", "first"]
-
-        print("\n test_active_genes")
-        print("Start genes = " + str(genes))
-        print("Active genes = " + str(active_genes))
-        print("Right solution = " + str(right_solution))
-
-        self.assertTrue(len(active_genes) < len(genes)
-                        and
-                        len(active_genes) == len(right_solution)
-                        and
-                        set(active_genes) == set(right_solution))
 
 
 def load_data(discharge_file, temperature_file, precipitation_file,
