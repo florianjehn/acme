@@ -5,7 +5,7 @@ Created on Jul 26 13:25 2017
 """
 from . import examples
 from . import genetics
-from . import model_generators
+from . import cmf_model_generators
 from . import tests
 from . import visualization
 

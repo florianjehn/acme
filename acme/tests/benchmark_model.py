@@ -227,8 +227,6 @@ class LumpedModelCMF:
         """
         For Spotpy
         """
-        print(len(evaluation))
-        print(len(simulation))
         return spotpy.objectivefunctions.nashsutcliffe(evaluation,
                                                        simulation)
 
@@ -278,7 +276,7 @@ def load_data(discharge_file, temperature_file, precipitation_file,
 
 
 if __name__ == '__main__':
-    from spotpy.algorithms import dream as sampler
+    from spotpy.algorithms import lhs as sampler
 
     parallel = 'mpi' if 'OMPI_COMM_WORLD_SIZE' in os.environ else 'seq'
 
@@ -293,4 +291,4 @@ if __name__ == '__main__':
     # print(sim)
     sampler = sampler(model, parallel=parallel, dbname="bench.csv",
                       dbformat="csv")
-    sampler.sample(300)
+    sampler.sample(30)

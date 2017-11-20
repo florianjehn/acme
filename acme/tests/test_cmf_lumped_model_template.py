@@ -4,8 +4,8 @@ Created on Nov 17 13:00 2017
 @author(s): Florian U. Jehn
 """
 import unittest
-from acme.model_generators import create_lumped_CMF_model as generator
-from acme.model_generators import lumped_CMF_model_template as template
+from acme.cmf_model_generators import create_lumped_CMF_model as generator
+from acme.cmf_model_generators import lumped_CMF_model_template as template
 import copy
 
 

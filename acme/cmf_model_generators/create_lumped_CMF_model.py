@@ -10,7 +10,7 @@ distribution, objective function, etc.).
 The structure is created in such a way, that there is always at least one
 connection to the outlet.
 """
-import acme.model_generators.lumped_CMF_model_template as template
+import acme.cmf_model_generators.lumped_CMF_model_template as template
 import acme.genetics.genetic as genetic
 import datetime
 import random
@@ -18,7 +18,7 @@ import os
 import copy
 import spotpy
 import time
-import acme.model_generators.genome_arrange as genome_arrange
+import acme.cmf_model_generators.genome_arrange as genome_arrange
 
 
 class LumpedCMFGenerator:

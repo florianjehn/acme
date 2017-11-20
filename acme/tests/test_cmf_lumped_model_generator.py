@@ -4,7 +4,7 @@ Created on Aug 17 14:17 2017
 @author(s): Florian U. Jehn
 """
 import unittest
-from acme.model_generators import create_lumped_CMF_model as generator
+from acme.cmf_model_generators import create_lumped_CMF_model as generator
 import acme.genetics as genetics
 import datetime
 import math

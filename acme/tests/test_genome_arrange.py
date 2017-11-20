@@ -4,8 +4,8 @@ Created on Nov 17 12:58 2017
 @author(s): Florian U. Jehn
 """
 import unittest
-from acme.model_generators import create_lumped_CMF_model as generator
-import acme.model_generators.genome_arrange as genome_arrange
+from acme.cmf_model_generators import create_lumped_CMF_model as generator
+import acme.cmf_model_generators.genome_arrange as genome_arrange
 
 
 class GeneratorsTests(unittest.TestCase):

@@ -13,7 +13,7 @@ import spotpy
 import numpy as np
 import cmf
 import acme.tests.get_storages_fluxes as get_storages_and_fluxes
-import acme.model_generators.spotpy_interface as spotpy_interface
+import acme.cmf_model_generators.spotpy_interface as spotpy_interface
 
 
 class LumpedModelCMF(spotpy_interface.SpotpyInterface):
@@ -308,5 +308,5 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
         simulation_calib = simulation[
                            self.begin_validation: self.end_validation]
         # Todo: Hier noch hydrological signatures?
-        return spotpy.likelihoods.gaussianLikelihoodMeasErrorOut(evaluation,
-                                                            simulation_calib)
+        return spotpy.objectivefunctions.nashsutcliffe(evaluation,
+                                                       simulation_calib)
