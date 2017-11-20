@@ -156,12 +156,13 @@ class LumpedModelCMF:
         P = time series precipitation
         T, Tmin, Tmax = time series of mean temperatur, min and max
         """
-        rainstation = self.project.rainfall_stations.add('Grebenau avg', prec,
+        rainstation = self.project.rainfall_stations.add('Rainfall station',
+                                                         prec,
                                                          (0, 0, 0))
         self.project.use_nearest_rainfall()
 
         # Temperature data
-        meteo = self.project.meteo_stations.add_station('Grebenau avg',
+        meteo = self.project.meteo_stations.add_station('Meteo Station',
                                                         (0, 0, 0))
         meteo.T = temp_avg
         meteo.Tmin = temp_min
@@ -195,7 +196,7 @@ class LumpedModelCMF:
 
             # Return the filled result time series
             if verbose:
-                print("End running")
+                print("Finished running")
             return sim_dis
         except RuntimeError:
             return np.array(self.Q[self.begin:self.end + datetime.timedelta(
