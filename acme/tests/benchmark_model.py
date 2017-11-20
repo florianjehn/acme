@@ -185,7 +185,8 @@ class LumpedModelCMF:
             sim_dis = cmf.timeseries(self.begin, cmf.day)
             # starts the solver and calculates the daily time steps
             end = self.end
-
+            if verbose:
+                print("Start running")
             for t in solver.run(self.project.meteo_stations[0].T.begin, end,
                                 cmf.day):
                 # Fill the results
@@ -193,6 +194,8 @@ class LumpedModelCMF:
                     sim_dis.add(self.outlet.waterbalance(t))
 
             # Return the filled result time series
+            if verbose:
+                print("End running")
             return sim_dis
         except RuntimeError:
             return np.array(self.Q[self.begin:self.end + datetime.timedelta(
