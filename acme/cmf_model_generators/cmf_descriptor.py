@@ -2,63 +2,80 @@
 """
 Created on Nov 08 09:18 2017
 @author(s): Florian U. Jehn, Philipp Kraft
-
 Describes a cmf model with storages, connections, cells, forcing data,
 outlets and so forth.
 """
+#%%
 import cmf
 
+def _describe_timeseries(ts: cmf.timeseries):
+    if ts:
+        return ('{count} values from {start:%Y-%m-%d} to {end:%Y-%m-%d} step {step}, min/mean/max  {min:0.5g} / {mean:0.5g} / {max:0.5g}'
+                .format(count=len(ts),
+                        start=ts.begin.AsPython(),
+                        end=ts.end.AsPython(),
+                        step=ts.step,
+                        min=ts.min(),
+                        mean=ts.mean(),
+                        max=ts.max()
+                        )
+                )
+    else:
+        return '~' # With no data in the timeseries return the YAML-NULL symbol
 
+def _describe_node(indentlevel, node, write):
+    write(indentlevel, '- {}'.format(node))
+    for connection in node.connections:
+        write(indentlevel + 1, '- {}'.format(connection))
+
+
+def _describe_cell(cell, write):
+    write(1, '- {}:'.format(cell))
+    for storage in cell.storages:
+        _describe_node(2, storage, write)
+
+
+def _describe_meteo(meteo, write):
+    write(1, '- {}:'.format(meteo))
+    for var_name, timeseries in meteo.TimeseriesDictionary().items():
+        write(2, '{}: {}'.format(var_name, _describe_timeseries(timeseries)))
+
+def _describe_rain(rainstation, write):
+    write(1, '- {} ({:0.2f}mm/year)'.format(rainstation.name, rainstation.data.mean()*365))
+    
+
+  
 def describe(project: cmf.project, out):
     """
     Describes a cmf project in a file like object.
-
     :param project: cmf project
     :param out: filelike object
     :return: None
     """
-    out.write('{}\n'.format(project))
+    def write(indentlevel=0, text=''):
+        """
+        Helper function to write output to the out stream with identation
+        """
+        out.write('    ' * indentlevel + text + '\n')
+    
+    write(0, '{}'.format(project))
+    write()
 
-    out.write("\nDescription of Cells\n")
+    write(0, 'Project nodes:')
+    for node in project.nodes:
+        _describe_node(1, node, write)
+    write()
+
+    write(0, 'Cells:')
     for cell in project:
-        out.write('\t- {}:\n'.format(cell))
-        for storage in cell.storages:
-            out.write('\t\t- {}\n'.format(storage))
-            for connection in storage.connections:
-                out.write('\t\t\t- {}\n'.format(connection))
+        _describe_cell(cell, write)
+    write()
 
-    out.write("\nDescription of Meteo Stations\n")
-
-    # ### Is there a smarter way to do this?
-    # Definition of all possible timeseries in meteo station
-    variables = ["T", "Tmax", "Tmin", "Tground", "Windspeed", "rHmean",
-                 "rHmin", "rHmax", "Tdew", "Sunshine", "Rs", "T_lapse"]
-
+    write(0, 'Meteo Stations:')
     for meteo in project.meteo_stations:
-        out.write("\t- {}:\n".format(meteo))
-        for timeseries in variables:
-            timeseries_object = eval("meteo." + timeseries)
-            out.write("\t\t- {}\n".format(timeseries_object))
-            # Breaks if the timeseries does not exist. Therefore try; except
-            try:
-                mean_val = timeseries_object.mean()
-                min_val = timeseries_object.min()
-                max_val = timeseries_object.max()
-            except IndexError:
-                mean_val = "NA"
-                min_val = "NA"
-                max_val = "NA"
+        _describe_meteo(meteo, write)
+    write()
 
-            out.write("\t\t\t- Mean: {}\tMin: {}\tMax: {}\n".format(
-                mean_val, min_val, max_val
-            ))
-
-    out.write("\nDescription of Rain Stations\n")
+    write(0, 'Rain Stations:')
     for rain in project.rainfall_stations:
-        out.write("\t- {}:\n".format(rain))
-
-    out.write("\nDescription of Outlets\n")
-    for outlet in project.nodes:
-        out.write("\t- {}:\n".format(outlet))
-
-
+        _describe_rain(rain, write)
