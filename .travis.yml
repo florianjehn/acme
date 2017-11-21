@@ -19,7 +19,7 @@ install:
 script:
   - python acme/tests/test_genetics.py
   - python acme/tests/test_cmf_descriptor.py
-  - python acme/tests/test_genome_arrange
+  - python acme/tests/test_genome_arrange.py
   - python acme/tests/test_cmf_lumped_model_template.py
   - python acme/tests/test_visualization.py
   - python acme/tests/test_examples.py
