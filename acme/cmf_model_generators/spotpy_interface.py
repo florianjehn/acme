@@ -36,8 +36,7 @@ class SpotpyInterface:
         For Spotpy. Creates a numpy array from the evaluation timeseries.
         """
         return np.array(
-            self.obs_discharge[self.begin_calibration:self.end_calibration +
-                               datetime.timedelta(days=1)])
+            self.obs_discharge[self.begin_calibration:self.end_calibration])
 
     def parameters(self):
         """
