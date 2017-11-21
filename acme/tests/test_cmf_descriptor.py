@@ -49,6 +49,9 @@ class DescriptorTest(unittest.TestCase):
             print("Finished writing file")
 
         if delete:
+            filepath = os.path.abspath(__file__)
+            directoy_name = os.path.dirname(filepath)
+            os.chdir(directoy_name)
             os.remove(DescriptorTest.filename)
 
 
