@@ -6,7 +6,7 @@ Created on Nov 20 12:40 2017
 
 import unittest
 import acme.cmf_model_generators.cmf_descriptor as descriptor
-import acme.tests.utilities_for_tests as utils
+import utilities_for_tests as utils
 import os
 
 
@@ -29,12 +29,12 @@ class DescriptorTest(unittest.TestCase):
         directoy_name = os.path.dirname(filepath)
         os.chdir(directoy_name)
         os.remove(DescriptorTest.filename)
-        print("Hash to compare to is " + benchmark_model_hash)
+        print("Hash to compare to is     " + benchmark_model_hash)
         print("Currently created hash is " + current_hash)
         self.assertTrue(benchmark_model_hash == current_hash)
 
     @staticmethod
-    def test_descriptor_writing(delete=False):
+    def test_descriptor_writing(delete=True):
         """
         Tests if the cmf descriptor is able to write to a file without an
         error message.

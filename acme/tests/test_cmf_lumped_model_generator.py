@@ -8,8 +8,7 @@ from acme.cmf_model_generators import create_lumped_CMF_model as generator
 import acme.genetics as genetics
 import datetime
 import math
-import acme.tests.utilities_for_tests as utils
-
+import utilities_for_tests as utils
 
 
 class GeneratorsTests(unittest.TestCase):
@@ -45,40 +44,6 @@ class GeneratorsTests(unittest.TestCase):
         #     pass
         # Outcommented for now. Will be reinstalled once everything else works
         pass
-
-    def test_get_fitness(self):
-        """
-        Calls the get_fitness function with a mockup model setup, which
-        contains all possible genes. To test if it runs correctly.
-
-        :return: None
-        """
-        print("\n test_get_fitness")
-        genes = generator.LumpedCMFGenerator.gene_set
-        precipitation, temperature_avg, temperature_min, \
-            temperature_max, discharge = utils.load_data(
-                "observed_discharge.txt",
-                "temperature_max_min_avg.txt",
-                "precipitation.txt",
-                2976.41
-            )
-        data = {
-            "prec": precipitation,
-            "discharge": discharge,
-            "t_mean": temperature_avg,
-            "t_min": temperature_min,
-            "t_max": temperature_max
-        }
-
-        fitness = generator.get_fitness(genes, data,
-                                        # start and end dates for
-                                        # calibration and validation
-                                        datetime.datetime(1980, 1, 1),
-                                        datetime.datetime(1981, 12, 31),
-                                        datetime.datetime(1982, 1, 1),
-                                        datetime.datetime(1983, 12, 31))
-        # Todo: Enter the right fitness value here for DREAM
-        self.assertTrue(fitness > -1)
 
     @staticmethod
     def test_display():
@@ -211,6 +176,40 @@ class GeneratorsTests(unittest.TestCase):
         # Delete them again, to not cause trouble when the program itself runs
         del models_so_far[model_1_str]
         del models_so_far[model_2_str]
+
+    def test_get_fitness(self):
+        """
+        Calls the get_fitness function with a mockup model setup, which
+        contains all possible genes. To test if it runs correctly.
+
+        :return: None
+        """
+        print("\n test_get_fitness")
+        genes = generator.LumpedCMFGenerator.gene_set
+        precipitation, temperature_avg, temperature_min, \
+            temperature_max, discharge = utils.load_data(
+                "observed_discharge.txt",
+                "temperature_max_min_avg.txt",
+                "precipitation.txt",
+                2976.41
+            )
+        data = {
+            "prec": precipitation,
+            "discharge": discharge,
+            "t_mean": temperature_avg,
+            "t_min": temperature_min,
+            "t_max": temperature_max
+        }
+
+        fitness = generator.get_fitness(genes, data,
+                                        # start and end dates for
+                                        # calibration and validation
+                                        datetime.datetime(1980, 1, 1),
+                                        datetime.datetime(1981, 12, 31),
+                                        datetime.datetime(1982, 1, 1),
+                                        datetime.datetime(1983, 12, 31))
+        # Todo: Enter the right fitness value here for DREAM
+        self.assertTrue(fitness > -1)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ Contains all functions which are used for tests but do not test themselve
 """
 
 import hashlib
-import acme.tests.benchmark_model as benchmark_model
+import benchmark_model
 import spotpy
 import cmf
 import os
