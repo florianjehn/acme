@@ -51,3 +51,6 @@ class DescriptorTest(unittest.TestCase):
         if delete:
             os.remove(DescriptorTest.filename)
 
+
+if __name__ == '__main__':
+    unittest.main()
