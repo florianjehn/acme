@@ -200,52 +200,61 @@ def get_fitness(genes, data,
     :param end_validation:
     :return: Fitness value
     """
-    # Check if the model to be generated is able to connect to an output
-    genome_arrange.check_for_connection(genes, LumpedCMFGenerator.connections)
+    def find_effective_structure():
+        # Check if the model to be generated is able to connect to an output
+        genome_arrange.check_for_connection(genes,
+                                            LumpedCMFGenerator.connections)
 
-    # Find the effective structure of the current genes
-    effective_structure = genome_arrange.find_active_genes(
-        genes,
-        LumpedCMFGenerator.storages)
+        # Find the effective structure of the current genes
+        effective_structure = genome_arrange.find_active_genes(
+            genes,
+            LumpedCMFGenerator.storages)
+        return effective_structure
 
-    # Compare if the genes the function gets, have already been calculated
-    #  as a model
-    for old_model in LumpedCMFGenerator.models_so_far.keys():
-        # Find the effective structure
-        # Turn model in list version
-        old_model_genes = old_model.split()
-        # Find out if the model has already been calculated. If so, simply
-        # return the fitness value of the old model
-        if set(old_model_genes) == set(genes):
-            return LumpedCMFGenerator.models_so_far[old_model]
-        if set(old_model_genes) == set(effective_structure):
-            return LumpedCMFGenerator.models_so_far[old_model]
+    def compare_to_old_models(effective_structure):
+        # Compare if the genes the function gets, have already been calculated
+        #  as a model
+        for old_model in LumpedCMFGenerator.models_so_far.keys():
+            # Find the effective structure
+            # Turn model in list version
+            old_model_genes = old_model.split()
+            # Find out if the model has already been calculated. If so, simply
+            # return the fitness value of the old model
+            if set(old_model_genes) == set(genes):
+                return LumpedCMFGenerator.models_so_far[old_model]
+            if set(old_model_genes) == set(effective_structure):
+                return LumpedCMFGenerator.models_so_far[old_model]
 
-    # If not call the template and run the model
-    current_model = template.LumpedModelCMF(effective_structure, data,
-                                            begin_calibration, end_calibration,
-                                            begin_validation, end_validation)
+    def run_model(effective_structure):
+        # If not call the template and run the model
+        current_model = template.LumpedModelCMF(effective_structure, data,
+                                                begin_calibration,
+                                                end_calibration,
+                                                begin_validation,
+                                                end_validation)
+        # Find out if the model should run parallel (for supercomputer)
+        parallel = 'mpi' if 'OMPI_COMM_WORLD_SIZE' in os.environ else 'seq'
+        # Connect the model to the dream algorithm.
+        sampler = spotpy.algorithms.lhs(current_model, parallel=parallel,
+                                        dbformat="noData")
+        sampler.sample(10)
+        # Extract the best value from the model
+        best_like = sampler.bestlike
+        # Save the current model in the all models list
+        model_key = " ".join(genes)
+        LumpedCMFGenerator.models_so_far[model_key] = best_like
+        # Return best_like
+        return best_like
 
-    # Find out if the model should run parallel (for supercomputer)
-    parallel = 'mpi' if 'OMPI_COMM_WORLD_SIZE' in os.environ else 'seq'
-
-    # Connect the model to the dream algorithm.
-    sampler = spotpy.algorithms.dream(current_model, parallel=parallel,
-                                      dbformat="noData")
-
-    # The template runs until the predefined convergence value of dream is
-    # reached (or the maximal value for repetitions is reached).
-    sampler.sample(10, convergence_limit=1.6)
-
-    # Extract the best value from the model
-    best_like = sampler.bestlike
-
-    # Save the current model in the all models list
-    model_key = " ".join(genes)
-    LumpedCMFGenerator.models_so_far[model_key] = best_like
-
-    # Return best fitness value of all runs
-    return best_like
+    structure = find_effective_structure()
+    old_best_like = compare_to_old_models(structure)
+    # Compare the effective structure with the old models. If it has already
+    #  been calculated return it. Otherwise run the model and determine its
+    # fitness.
+    if old_best_like is not None:
+        return old_best_like
+    else:
+        return run_model(structure)
 
 
 def display(candidate, start_time):
@@ -276,9 +285,7 @@ def mutate(genes, gene_set):
     :param gene_set: all possible genes.
     :return: None (the list is directly manipulated)
     """
-    mutation_type = random.choice(["add", "del", "swap"])
-    max_changes = 3
-    if mutation_type == "add":
+    def add_mutation(max_changes):
         for _ in range(random.randint(1, max_changes)):
             # If the genes already contains all possible genes,
             # delete one gene and stop iteration
@@ -293,7 +300,7 @@ def mutate(genes, gene_set):
                     genes.append(new_gene)
                     break
 
-    elif mutation_type == "del":
+    def del_mutation(max_changes):
         for _ in range(random.randint(1, max_changes)):
             # If the list is empty add an item and stop iteration
             if len(genes) == 0:
@@ -304,7 +311,7 @@ def mutate(genes, gene_set):
             random.shuffle(genes)
             genes.pop()
 
-    elif mutation_type == "swap":
+    def swap_mutation(max_changes):
         for _ in range(random.randint(1, max_changes)):
             # Make a copy of the parent genes
             initial_genes = genes[:]
@@ -318,6 +325,10 @@ def mutate(genes, gene_set):
                                     initial_genes[index]
                                     else
                                     new_gene)
+
+    mutation_type = random.choice[add_mutation, del_mutation, swap_mutation]
+    mutation_type(max_changes=3)
+
     return
 
 
@@ -367,50 +378,60 @@ def create(test=False):
         else:
             return False
 
-    # Snow
-    if append_eventually("snow"):
-        append_eventually("snow_meltrate")
-        append_eventually("snow_melt_temp")
+    def snow_genes():
+        if append_eventually("snow"):
+            append_eventually("snow_meltrate")
+            append_eventually("snow_melt_temp")
 
-    # Canopy
-    if append_eventually("canopy"):
-        append_eventually("canopy_closure")
-        append_eventually("canopy_lai")
+    def canopy_genes():
+        if append_eventually("canopy"):
+            append_eventually("canopy_closure")
+            append_eventually("canopy_lai")
 
-    # Layers/Storages and their connections
-    if append_eventually("second"):
-        # Connections second layer
-        # loop through until second_layer has a connection so somewhere
-        while "tr_second_third" not in genes or "tr_second_river" not in genes:
-            if append_eventually("tr_second_third"):
-                append_eventually("beta_second_third")
+    def second_third_layer_genes():
+        # Layers/Storages and their connections
+        if append_eventually("second"):
+            # Connections second layer
+            # loop through until second_layer has a connection so somewhere
+            while ("tr_second_third" not in genes or "tr_second_river" not
+                   in genes):
+                if append_eventually("tr_second_third"):
+                    append_eventually("beta_second_third")
 
-            if append_eventually("tr_second_river"):
-                append_eventually("beta_second_river")
+                if append_eventually("tr_second_river"):
+                    append_eventually("beta_second_river")
 
-        if append_eventually("third"):
-            # Connections third layer
-            # always add a connection, otherwise third_layer would be a dead
-            # end
-            genes.append("tr_third_river")
-            append_eventually("beta_third_river")
+            if append_eventually("third"):
+                # Connections third layer
+                # always add a connection, otherwise third_layer would be a
+                # dead end
+                genes.append("tr_third_river")
+                append_eventually("beta_third_river")
 
-    if append_eventually("river"):
-        append_eventually("tr_river_out")
-        append_eventually("beta_river_out")
+    def river_genes():
+        if append_eventually("river"):
+            append_eventually("tr_river_out")
+            append_eventually("beta_river_out")
 
-    # Connections first layer
-    if append_eventually("tr_first_second"):
-        append_eventually("beta_first_second")
-        append_eventually("v0_first_second")
+    def first_layer_genes():
+        # Connections first layer
+        if append_eventually("tr_first_second"):
+            append_eventually("beta_first_second")
+            append_eventually("v0_first_second")
 
-    if append_eventually("tr_first_river"):
-        append_eventually("beta_first_river")
-        append_eventually("v0_first_river")
+        if append_eventually("tr_first_river"):
+            append_eventually("beta_first_river")
+            append_eventually("v0_first_river")
 
-    if append_eventually("tr_first_out"):
-        append_eventually("beta_first_out")
-        append_eventually("v0_first_out")
+        if append_eventually("tr_first_out"):
+            append_eventually("beta_first_out")
+            append_eventually("v0_first_out")
+
+    first_layer_genes()
+    second_third_layer_genes()
+    river_genes()
+    snow_genes()
+    canopy_genes()
 
     # Check if a connection to the outlet exists
     genome_arrange.check_for_connection(genes, LumpedCMFGenerator.connections)
@@ -448,5 +469,3 @@ def write_all_models(test=False):
     # Remove the file when only a test is run
     if test:
         os.remove(name)
-
-
