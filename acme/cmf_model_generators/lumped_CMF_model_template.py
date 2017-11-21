@@ -169,79 +169,101 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
         cell = self.project[0]
         storages = self.storages
 
-        # Find all active connections
-        active_connections = []
-        for param in param_dict.keys():
-            if "tr_" in param:
-                active_connections.append(param)
-
-        # Go through all active connections
-        for connection in active_connections:
-            temp, source_tr, target_tr = connection.split("_")
-
-            # Save the parameter values to be able to create the connection
-            connection_params = {"tr": param_dict[connection],
-                                 # Include the default values for beta and
-                                 # V0, so a kinematic wave can always be
-                                 # created.
-                                 "beta": 1.0,
-                                 "V0": 1.0}
-
-            # Find all other parameter which belong to that connection
+        def find_active_connections():
+            active_connections = []
             for param in param_dict.keys():
-                try:
-                    name, source_param, target_param = param.split("_")
-                    # Save the values
-                    if ((name == "beta" or name == "V0")
-                        and
-                            source_tr == source_param
-                        and
-                            target_tr == target_param):
+                if "tr_" in param:
+                    active_connections.append(param)
+            return active_connections
 
-                        connection_params[name] = param_dict[param]
+        def create_connections(active_connections):
+            """
+            Createas an kinematic wave conncetion and pulls the right
+            parameters values from the param_dict
+            :return:
+            """
+            # Go through all active connections
+            for connection in active_connections:
+                temp, source_tr, target_tr = connection.split("_")
 
-                except ValueError:
-                    # ValueError is raised because the not all genes can be
-                    # split in three parts. But as all genes that are of
-                    # interest now can be, the error can pass.
-                    pass
+                # Save the parameter values to be able to create the connection
+                connection_params = {"tr": param_dict[connection],
+                                     # Include the default values for beta and
+                                     # V0, so a kinematic wave can always be
+                                     # created.
+                                     "beta": 1.0,
+                                     "V0": 1.0}
 
-            # Create the connection
-            cmf.kinematic_wave(storages[source_tr],
-                               storages[target_tr],
-                               param_dict[connection],
-                               V0=connection_params["V0"],
-                               exponent=connection_params["beta"])
+                # Find all other parameter which belong to that connection
+                for param in param_dict.keys():
+                    try:
+                        name, source_param, target_param = param.split("_")
+                        # Save the values
+                        if ((name == "beta" or name == "V0")
+                            and
+                                source_tr == source_param
+                            and
+                                target_tr == target_param):
 
-        # Fill in the snow parameters when they exist. If not
-        # leave them at CMFs default value.
-        if "snow" in self.genes:
-            cmf.SimpleTindexSnowMelt(cell.snow, cell.surfacewater, cell,
-                                     rate=param_dict.get("snow_meltrate", 7))
-            cmf.Weather.set_snow_threshold(param_dict.get("snow_melt_temp",
-                                                          0.5))
+                            connection_params[name] = param_dict[param]
 
-        # Fill in the canopy parameters when they exist
-        if "canopy" in self.genes:
-            # Splits the rainfall in interception and throughfall
-            cmf.Rainfall(cell.canopy, cell, False, True)
-            cmf.Rainfall(cell.surfacewater, cell, True, False)
-            # Makes a overflow for the interception storage
-            cmf.RutterInterception(cell.canopy, cell.surfacewater, cell)
-            # Transpiration on the plants is added
-            cmf.CanopyStorageEvaporation(cell.canopy, cell.evaporation, cell)
+                    except ValueError:
+                        # ValueError is raised because the not all genes can be
+                        # split in three parts. But as all genes that are of
+                        # interest now can be, the error can pass.
+                        pass
 
-            # Set LAI and Canopy Closure if they exist in the dict. If not
+                # Create the connection
+                cmf.kinematic_wave(storages[source_tr],
+                                   storages[target_tr],
+                                   param_dict[connection],
+                                   V0=connection_params["V0"],
+                                   exponent=connection_params["beta"])
+
+        def create_snow():
+            # Fill in the snow parameters when they exist. If not
             # leave them at CMFs default value.
-            cell.vegetation.LAI = param_dict.get("canopy_lai", 2.88)
-            cell.vegetation.CanopyClosure = param_dict.get("canopy_closure",
-                                                           1.0)
+            if "snow" in self.genes:
+                cmf.SimpleTindexSnowMelt(cell.snow, cell.surfacewater, cell,
+                                         rate=param_dict.get("snow_meltrate",
+                                                             7))
+                cmf.Weather.set_snow_threshold(param_dict.get("snow_melt_temp",
+                                                              0.5))
 
-        # Establish a waterbalance_connection if the river does not exist as
-        #  a separate storage, so the model treats it as if it would not exist.
-        if "river" not in self.genes:
-            cmf.waterbalance_connection(self.storages["river"],
-                                        self.storages["out"])
+        def create_canopy():
+            # Fill in the canopy parameters when they exist
+            if "canopy" in self.genes:
+                # Splits the rainfall in interception and throughfall
+                cmf.Rainfall(cell.canopy, cell, False, True)
+                cmf.Rainfall(cell.surfacewater, cell, True, False)
+                # Makes a overflow for the interception storage
+                cmf.RutterInterception(cell.canopy, cell.surfacewater, cell)
+                # Transpiration on the plants is added
+                cmf.CanopyStorageEvaporation(cell.canopy, cell.evaporation,
+                                             cell)
+
+                # Set LAI and Canopy Closure if they exist in the dict. If not
+                # leave them at CMFs default value.
+                cell.vegetation.LAI = param_dict.get("canopy_lai", 2.88)
+                cell.vegetation.CanopyClosure = param_dict.get(
+                    "canopy_closure", 1.0)
+
+        def shortcircuit_river():
+            """
+            Establish a waterbalance_connection if the river does not exist as
+            a separate storage, so the model treats it as if it would not
+            exist.
+
+            :return: None
+            """
+            if "river" not in self.genes:
+                cmf.waterbalance_connection(self.storages["river"],
+                                            self.storages["out"])
+
+        create_connections(find_active_connections())
+        create_snow()
+        create_canopy()
+        shortcircuit_river()
 
     def make_stations(self, prec, temp, temp_min, temp_max):
         """

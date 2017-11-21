@@ -208,8 +208,7 @@ class GeneratorsTests(unittest.TestCase):
                                         datetime.datetime(1981, 12, 31),
                                         datetime.datetime(1982, 1, 1),
                                         datetime.datetime(1983, 12, 31))
-        # Todo: Enter the right fitness value here for DREAM
-        self.assertTrue(fitness > -1)
+        self.assertTrue(fitness > 0)
 
 
 if __name__ == '__main__':
