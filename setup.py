@@ -32,7 +32,7 @@ setup(
   url='https://github.com/zutn/ACME',
   license='Apache-2.0',
   packages=["acme", "acme.examples", "acme.genetics",
-            "acme.model_generators", "acme.visualization", "acme.tests"],
+            "acme.cmf_model_generators", "acme.visualization", "acme.tests"],
   include_package_data=True,
   zip_save=False,
   keywords=['Evolution', 'lumped models', 'Genetic Algorithms', 'Hydrology',
