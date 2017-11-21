@@ -5,10 +5,15 @@ Created on Nov 08 09:18 2017
 Describes a cmf model with storages, connections, cells, forcing data,
 outlets and so forth.
 """
-#%%
 import cmf
 
 def _describe_timeseries(ts: cmf.timeseries):
+    """
+    Describes a cmf timeseries with its start, end, step, min, mean and max.
+    
+    :param: ts: a cmf.timeseries
+    :return: None
+    """
     if ts:
         return ('{count} values from {start:%Y-%m-%d} to {end:%Y-%m-%d} step {step}, min/mean/max  {min:0.5g} / {mean:0.5g} / {max:0.5g}'
                 .format(count=len(ts),
@@ -22,6 +27,7 @@ def _describe_timeseries(ts: cmf.timeseries):
                 )
     else:
         return '~' # With no data in the timeseries return the YAML-NULL symbol
+    
 
 def _describe_node(indentlevel, node, write):
     write(indentlevel, '- {}'.format(node))
