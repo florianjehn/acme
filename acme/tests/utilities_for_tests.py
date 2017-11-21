@@ -65,7 +65,10 @@ def load_data(discharge_file, temperature_file, precipitation_file,
     step = datetime.timedelta(days=1)
     # empty time series
     precipitation = cmf.timeseries(begin, step)
-    cwd = os.getcwd() + os.sep
+    if os.name == "nt":
+        cwd = os.getcwd()
+    else:
+        cwd = os.getcwd() + os.sep + "acme" + os.sep + "tests" + os.sep
     print("Current Working Directory = " + cwd)
     with open(cwd + precipitation_file) as precipitation_file_file:
         precipitation.extend(float(precipitation_str) for
