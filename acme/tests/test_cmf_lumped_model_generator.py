@@ -8,8 +8,8 @@ from acme.cmf_model_generators import create_lumped_CMF_model as generator
 import acme.genetics as genetics
 import datetime
 import math
-import cmf
-import os
+import acme.tests.utilities_for_tests as utils
+
 
 
 class GeneratorsTests(unittest.TestCase):
@@ -56,7 +56,7 @@ class GeneratorsTests(unittest.TestCase):
         print("\n test_get_fitness")
         genes = generator.LumpedCMFGenerator.gene_set
         precipitation, temperature_avg, temperature_min, \
-            temperature_max, discharge = load_data(
+            temperature_max, discharge = utils.load_data(
                 "observed_discharge.txt",
                 "temperature_max_min_avg.txt",
                 "precipitation.txt",
@@ -212,49 +212,6 @@ class GeneratorsTests(unittest.TestCase):
         del models_so_far[model_1_str]
         del models_so_far[model_2_str]
 
-
-def load_data(discharge_file, temperature_file, precipitation_file,
-              area_catchment):
-    """
-    Loads climata and discharge data from the corresponding files
-    discharge_file, temperature_file and precipitation_file
-    """
-
-    # Fixed model starting point
-    begin = datetime.datetime(1979, 1, 1)
-    step = datetime.timedelta(days=1)
-    # empty time series
-    precipitation = cmf.timeseries(begin, step)
-    if os.name == "nt":
-        cwd = os.getcwd() + os.sep
-    else:
-        cwd = os.getcwd() + os.sep + "acme" + os.sep + "tests" + os.sep
-    print("Current Working Directory = " + cwd)
-    with open(cwd + precipitation_file) as precipitation_file_file:
-        precipitation.extend(float(precipitation_str) for
-                             precipitation_str in
-                             precipitation_file_file)
-    discharge = cmf.timeseries(begin, step)
-    with open(cwd + discharge_file) as discharge_file_file:
-        discharge.extend(float(discharge_str) for discharge_str in
-                         discharge_file_file)
-    # Convert m3/s to mm/day
-    discharge *= 86400 * 1e3 / (area_catchment * 1e6)
-    temperature_avg = cmf.timeseries(begin, step)
-    temperature_min = cmf.timeseries(begin, step)
-    temperature_max = cmf.timeseries(begin, step)
-
-    # Go through all lines in the file
-    with open(cwd + temperature_file) as temperature_file_file:
-        for line in temperature_file_file:
-            columns = line.split('\t')
-            if len(columns) == 3:
-                temperature_max.add(float(columns[0]))
-                temperature_min.add(float(columns[1]))
-                temperature_avg.add(float(columns[2]))
-
-    return precipitation, temperature_avg, temperature_min,\
-        temperature_max, discharge
 
 if __name__ == '__main__':
     unittest.main()
