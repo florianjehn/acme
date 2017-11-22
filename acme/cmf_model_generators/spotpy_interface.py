@@ -19,6 +19,7 @@ class SpotpyInterface:
         self.obs_discharge = None
         self.begin_calibration = None
         self.end_calibration = None
+        self.end_validation = None
 
     def simulation(self, vector):
         """
@@ -27,8 +28,11 @@ class SpotpyInterface:
         """
         param_dict = dict((pp.name, v) for pp, v in zip(self.params, vector))
         self.setparameters(param_dict)
-
-        sim_discharge = self.run_model()
+        try:
+            sim_discharge = self.run_model()
+        except KeyboardInterrupt:
+            sim_discharge = np.array(self.obs_discharge[
+                            self.begin_calibration:self.end_validation])*np.nan
         return np.array(sim_discharge)
 
     def evaluation(self):
