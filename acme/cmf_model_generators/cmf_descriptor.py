@@ -27,22 +27,22 @@ def describe(project: cmf.project, out):
     write()
 
     write(0, 'Project nodes:')
-    for node in project.nodes:
+    for node in sorted(project.nodes):
         _describe_node(1, node, write)
     write()
 
     write(0, 'Cells:')
-    for cell in project:
+    for cell in sorted(project):
         _describe_cell(cell, write)
     write()
 
     write(0, 'Meteo Stations:')
-    for meteo in project.meteo_stations:
+    for meteo in sorted(project.meteo_stations):
         _describe_meteo(meteo, write)
     write()
 
     write(0, 'Rain Stations:')
-    for rain in project.rainfall_stations:
+    for rain in sorted(project.rainfall_stations):
         _describe_rain(rain, write)
 
     out.close()

@@ -53,8 +53,6 @@ class GeneratorsTemplate(unittest.TestCase):
 
         :return: parametrized model, ready to run
         """
-        print("\n test_template_parametrization")
-
         # Initialize data and genome
         genes = generator.LumpedCMFGenerator.gene_set
         precipitation, temperature_avg, temperature_min, \
