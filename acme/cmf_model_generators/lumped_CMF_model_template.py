@@ -154,7 +154,7 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
                 params.append(distribution(gene, 0., 1.0))
             # Leaf area index
             elif "canopy_lai" in gene:
-                params.append(distribution(gene, 1., 14.))
+                params.append(distribution(gene, 1., 10))
 
         return params
 

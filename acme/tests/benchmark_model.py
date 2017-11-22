@@ -13,7 +13,7 @@ import numpy as np
 import cmf
 from spotpy.parameter import Uniform as Param
 import os
-import acme.tests.utilities_for_tests as utils
+import utilities_for_tests as utils
 
 
 class LumpedModelCMF:
@@ -32,7 +32,7 @@ class LumpedModelCMF:
                        Param("beta_second_third", 0., 4),
                        Param("beta_third_river", 0., 4),
                        Param("beta_river_out", 0., 4),
-                       Param("canopy_lai", 1., 14),
+                       Param("canopy_lai", 1., 10),
                        Param("canopy_closure", 0., 1.0),
                        Param("snow_meltrate", 0.1, 15.),
                        Param("snow_melt_temp", -5.0, 5.0),
@@ -197,6 +197,7 @@ class LumpedModelCMF:
             for t in solver.run(self.project.meteo_stations[0].T.begin, end,
                                 cmf.day):
                 # Fill the results
+                # print(t)
                 if t >= self.begin:
                     sim_dis.add(self.outlet.waterbalance(t))
 
@@ -205,8 +206,7 @@ class LumpedModelCMF:
                 print("Finished running")
             return sim_dis
         except RuntimeError:
-            return np.array(self.Q[self.begin:self.end + datetime.timedelta(
-                days=1)]) * np.nan
+            return np.array(self.Q[self.begin:self.end]) * np.nan
 
     def simulation(self, vector):
         """
@@ -257,4 +257,4 @@ if __name__ == '__main__':
     # print(sim)
     sampler = sampler(model, parallel=parallel, dbname="bench.csv",
                       dbformat="csv")
-    sampler.sample(30)
+    sampler.sample(1000)

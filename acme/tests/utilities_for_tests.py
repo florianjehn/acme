@@ -66,7 +66,7 @@ def load_data(discharge_file, temperature_file, precipitation_file,
     # empty time series
     precipitation = cmf.timeseries(begin, step)
     if os.name == "nt":
-        cwd = os.getcwd()
+        cwd = os.getcwd() + os.sep
     else:
         cwd = os.getcwd() + os.sep + "acme" + os.sep + "tests" + os.sep
     print("Current Working Directory = " + cwd)
