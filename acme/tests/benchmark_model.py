@@ -8,12 +8,14 @@ Model which mimics the maximal layout of the ACME Template, to test whether
 this model works.
 """
 import datetime
-import spotpy
-import numpy as np
-import cmf
-from spotpy.parameter import Uniform as Param
 import os
+
+import cmf
+import numpy as np
+import spotpy
 import utilities_for_tests as utils
+from spotpy.parameter import Uniform as Param
+import acme.exit_after as exit_after
 
 
 class LumpedModelCMF:
@@ -177,6 +179,7 @@ class LumpedModelCMF:
 
         return rainstation
 
+    @exit_after.exit_after(120)
     def runmodel(self, verbose=False):
         """
         starts the model
@@ -216,7 +219,10 @@ class LumpedModelCMF:
 
         paramdict = dict((pp.name, v) for pp, v in zip(self.Params, vector))
         self.setparameters(**paramdict)
-        sim_dis = self.runmodel()
+        try:
+            sim_dis = self.runmodel()
+        except KeyboardInterrupt:
+            sim_dis = np.array(self.Q[self.begin:self.end]) * np.nan
         return np.array(sim_dis)
 
     def evaluation(self):
