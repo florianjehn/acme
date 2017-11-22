@@ -326,10 +326,9 @@ def mutate(genes, gene_set):
                                     else
                                     new_gene)
 
-    mutation_type = random.choice[add_mutation, del_mutation, swap_mutation]
-    mutation_type(max_changes=3)
-
-    return
+        mutation_type = [add_mutation, del_mutation, swap_mutation]
+        random.choice(mutation_type)(max_changes=3)
+        return
 
 
 def crossover(first_parent, second_parent):
