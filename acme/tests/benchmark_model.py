@@ -164,7 +164,7 @@ class LumpedModelCMF:
         P = time series precipitation
         T, Tmin, Tmax = time series of mean temperatur, min and max
         """
-        rainstation = self.project.rainfall_stations.add('Rainfall station',
+        rainstation = self.project.rainfall_stations.add('Rainfall Station',
                                                          prec,
                                                          (0, 0, 0))
         self.project.use_nearest_rainfall()
