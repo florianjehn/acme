@@ -7,13 +7,13 @@ This template is called from the generator to be used as basis for all
 models which are generated during the evolutionary process. Also the class is
 the interface to spotpy.
 """
-
-import datetime
 import spotpy
 import numpy as np
 import cmf
 import acme.tests.get_storages_fluxes as get_storages_and_fluxes
 import acme.cmf_model_generators.spotpy_interface as spotpy_interface
+from acme.exit_after import exit_after
+import acme.cmf_model_generators.weather_stations_cmf as weather_stations
 
 
 class LumpedModelCMF(spotpy_interface.SpotpyInterface):
@@ -42,6 +42,11 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
 
         # Create params list
         self.params = self.create_params_from_genes(self.genes)
+
+        # Define all other instance variables
+        self.project = None
+        self.outlet = None
+        self.storages = None
 
         def basic_model_setup():
             """
@@ -76,7 +81,8 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
             cmf.HargreaveET(first_layer, cell.transpiration)
 
             # Create the CMF meteo and rain stations
-            self.make_stations(prec, t_mean, t_min, t_max)
+            weather_stations.make_stations(self.project, prec, t_mean, t_min,
+                                           t_max)
 
             # Create an outlet
             self.outlet = project.NewOutlet("outlet", 10, 0, 0)
@@ -265,24 +271,8 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
         create_canopy()
         shortcircuit_river()
 
-    def make_stations(self, prec, temp, temp_min, temp_max):
-        """
-        Creates the cmf weather stations
-        """
-        rainstation = self.project.rainfall_stations.add("Rainfall Station",
-                                                         prec, (0, 0, 0))
-        self.project.use_nearest_rainfall()
-
-        # Temperature data
-        meteo = self.project.meteo_stations.add_station('Meteo Station',
-                                                        (0, 0, 0))
-        meteo.T = temp
-        meteo.Tmin = temp_min
-        meteo.Tmax = temp_max
-        self.project.use_nearest_meteo()
-        return rainstation
-
-    def run_model(self, verbose = True):
+    @exit_after(60)
+    def run_model(self, verbose=False):
         """
         Starts the model. Used by spotpy
         """
@@ -292,7 +282,7 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
             solver = cmf.CVodeIntegrator(self.project, 1e-8)
 
             # New time series for model results
-            resQ = cmf.timeseries(self.begin_calibration, cmf.day)
+            sim_dis = cmf.timeseries(self.begin_calibration, cmf.day)
             # starts the solver and calculates the daily time steps
             end = self.end_validation
             for t in solver.run(self.project.meteo_stations[0].T.begin, end,
@@ -314,21 +304,24 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
                     print(fluxes)
                     print("\n")
                 if t >= self.begin_calibration:
-                    resQ.add(self.outlet.waterbalance(t))
-            return resQ
+                    sim_dis.add(self.outlet.waterbalance(t))
+            return sim_dis
         # Return an nan - array when a runtime error occurs
         except RuntimeError:
             print("Runtime Error")
             return np.array(self.obs_discharge[
-                            self.begin_calibration:self.end_validation +
-                            datetime.timedelta(days=1)])*np.nan
+                            self.begin_calibration:self.end_validation])*np.nan
 
     def objectivefunction(self, simulation, evaluation):
         """
         For Spotpy. Tells Spotpy how the model is to be evaluated.
         """
-        simulation_calib = simulation[
-                           self.begin_validation: self.end_validation]
+        duration_validation = (self.end_validation -
+                               self.begin_validation).days
+        simulation_valid = simulation[:-duration_validation]
+        evaluation_valid = evaluation[:-duration_validation]
+        print("Len Sim: " + str(len(simulation_valid)))
+        print("Len Eval: " + str(len(evaluation_valid)))
         # Todo: Hier noch hydrological signatures?
-        return spotpy.objectivefunctions.nashsutcliffe(evaluation,
-                                                       simulation_calib)
+        return spotpy.objectivefunctions.nashsutcliffe(evaluation_valid,
+                                                       simulation_valid)
