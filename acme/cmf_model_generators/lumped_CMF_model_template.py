@@ -30,6 +30,7 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
         :param begin_validation: start date of the validation period
         :param end_validation: end date of the validation period
         """
+        #super().__init__()
         # Main things
         self.genes = genes
         self.data = data
@@ -110,10 +111,10 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
                 self.storages["canopy"] = self.canopy
 
             if "second" in self.genes:
-                self.storages["second"] = cell.add_layer(5.0)
+                self.storages["second"] = cell.add_layer(3.0)
 
             if "third" in self.genes:
-                self.storages["third"] = cell.add_layer(10.0)
+                self.storages["third"] = cell.add_layer(5.0)
 
             # Always create the river, but connect it later with a waterbalance
             # connection to the outlet if it does not exist in the genes. This
@@ -135,32 +136,32 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
         # ET Params always included
         # ETV1 = Under this volume the potential ET is reduced by the factor
         # fETV0
-        params.append(distribution("ETV1", 0., 200.))
-        params.append(distribution("fETV0", 0., 0.5))
+        params.append(distribution("ETV1", 50., 100.))
+        params.append(distribution("fETV0", 0.2, 0.5))
 
         # Create all the other parameters if they exist.
         for gene in genes:
             # tr = transition time
             if "tr_" in gene:
-                params.append(distribution(gene, 0., 300.))
+                params.append(distribution(gene, 1., 300.))
             # Exponent to scale the kinematic wave
             elif "beta" in gene:
-                params.append(distribution(gene, 0., 4.))
+                params.append(distribution(gene, 1, 4.))
             # Rate in which the snow melts
             elif "snow_meltrate" in gene:
-                params.append(distribution(gene, 0.1, 15.))
+                params.append(distribution(gene, 2, 10.))
             # Temperature at which the snow melts
             elif "snow_melt_temp" in gene:
-                params.append(distribution(gene, -5.0, 5.0))
+                params.append(distribution(gene, -3.0, 3.0))
             # Field capacity like feature
             elif "v0" in gene:
-                params.append(distribution(gene, 0., 200))
+                params.append(distribution(gene, 50., 100))
             # Closure of the canopy
             elif "canopy_closure" in gene:
-                params.append(distribution(gene, 0., 1.0))
+                params.append(distribution(gene, 0.3, 0.7))
             # Leaf area index
             elif "canopy_lai" in gene:
-                params.append(distribution(gene, 1., 10))
+                params.append(distribution(gene, 3., 8))
 
         return params
 
@@ -172,6 +173,7 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
         :param param_dict: Dictionary of all the parameters and their values.
         :return None
         """
+        print(param_dict)
         cell = self.project[0]
         storages = self.storages
 
@@ -272,7 +274,7 @@ class LumpedModelCMF(spotpy_interface.SpotpyInterface):
         shortcircuit_river()
 
     @exit_after(60)
-    def run_model(self, verbose=False):
+    def run_model(self, verbose=True):
         """
         Starts the model. Used by spotpy
         """
