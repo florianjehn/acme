@@ -1,6 +1,6 @@
-# ACME
+# acme
 
-**A**utomated **C**onstruction of **M**odels by **E**volution
+**A** utomated **C** onstruction of **M** odels by **E** volution
 ---
 
 [![Build Status][travis-image]][travis-link]
